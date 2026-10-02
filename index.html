@@ -715,14 +715,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
       margin-bottom: 8px;
       font-size: 0.85rem;
       color: var(--text-muted);
     }
 
-    .savings-row input {
-      width: 110px;
+    .savings-values {
+      font-weight: 600;
+      color: #ffffff;
+      font-size: 0.95rem;
     }
 
     .task-list {
@@ -813,6 +814,19 @@
       <div class="modal-buttons">
         <button onclick="closeDeleteModal()">Отмена</button>
         <button class="danger" id="confirmDeleteBtn">Удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно пополнения финансовой цели -->
+  <div id="addSavingsModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-text" style="font-weight: 600; color: #fff;">Пополнить цель</div>
+      <div class="modal-text" style="font-size: 0.85rem; color: var(--text-muted);">Введите сумму, которую хотите добавить (или списать со знаком минус, например: -1000)</div>
+      <input type="number" id="savingsAmountInput" class="widget-input" placeholder="Сумма (например, 5000)">
+      <div class="modal-buttons">
+        <button onclick="closeSavingsModal()">Отмена</button>
+        <button class="primary" onclick="confirmAddSavings()">Добавить</button>
       </div>
     </div>
   </div>
@@ -951,6 +965,7 @@
     let expandedTweets = {};
     let timerInterval = null;
     let pendingDeleteId = null;
+    let activeSavingsWidgetId = null;
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -1257,6 +1272,39 @@
       }
     });
 
+    // Управление пополнением цели
+    function openSavingsModal(id) {
+      activeSavingsWidgetId = id;
+      document.getElementById('savingsAmountInput').value = '';
+      document.getElementById('addSavingsModal').classList.add('show');
+      setTimeout(() => document.getElementById('savingsAmountInput').focus(), 50);
+    }
+
+    function closeSavingsModal() {
+      activeSavingsWidgetId = null;
+      document.getElementById('addSavingsModal').classList.remove('show');
+    }
+
+    function confirmAddSavings() {
+      const valInput = document.getElementById('savingsAmountInput');
+      const addVal = parseFloat(valInput.value);
+
+      if (isNaN(addVal)) {
+        alert('Введите корректную сумму!');
+        return;
+      }
+
+      if (activeSavingsWidgetId !== null) {
+        const widget = widgets.find(w => w.id === activeSavingsWidgetId);
+        if (widget) {
+          widget.data.current = (widget.data.current || 0) + addVal;
+          if (widget.data.current < 0) widget.data.current = 0;
+          saveAndRender();
+        }
+      }
+      closeSavingsModal();
+    }
+
     function toggleUserProfileMenu(e) {
       e.stopPropagation();
       closeAllMenus();
@@ -1551,7 +1599,6 @@
               </div>
             `;
           } else {
-            // Красиво форматируем дату старта для отображения под счетчиком
             const startDateObj = new Date(w.data.startTime);
             const formattedStartDate = startDateObj.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + startDateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
@@ -1589,16 +1636,19 @@
             <div>
               <div class="savings-row">
                 <span>Накоплено:</span>
-                <input type="number" class="widget-input" value="${current}" onchange="updateSavings(${w.id}, 'current', this.value)">
+                <span class="savings-values">${current.toLocaleString('ru-RU')} ₽</span>
               </div>
               <div class="savings-row">
-                <span>Цель (руб):</span>
-                <input type="number" class="widget-input" value="${target}" onchange="updateSavings(${w.id}, 'target', this.value)">
+                <span>Цель:</span>
+                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${target}" onchange="updateSavingsTarget(${w.id}, this.value)">
               </div>
               <div class="progress-bar">
                 <div class="progress-fill" style="width: ${percent}%;"></div>
               </div>
-              <div style="font-size: 0.75rem; color: var(--text-muted); text-align: right;">Прогресс: ${percent}%</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Прогресс: ${percent}%</span>
+                <button class="primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openSavingsModal(${w.id})">+ Пополнить</button>
+              </div>
             </div>
           `;
         } 
@@ -1647,10 +1697,10 @@
       }
     }
 
-    function updateSavings(id, field, val) {
+    function updateSavingsTarget(id, val) {
       const widget = widgets.find(w => w.id === id);
       if (widget) {
-        widget.data[field] = parseFloat(val) || 0;
+        widget.data.target = parseFloat(val) || 1;
         saveAndRender();
       }
     }
