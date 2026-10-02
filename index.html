@@ -48,7 +48,7 @@
       max-width: 1200px;
       margin: 0 auto;
       min-height: 100vh;
-      overscroll-behavior-y: contain; /* Блокировка системного свайп-рефреша страницы */
+      overscroll-behavior-y: contain;
     }
 
     .brand-logo {
@@ -441,6 +441,13 @@
       color: var(--text-muted);
     }
 
+    .tweet-edited-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-left: 4px;
+    }
+
     .tweet-text-content {
       font-size: 0.9rem;
       color: var(--text-main);
@@ -551,7 +558,7 @@
       user-select: none;
       -webkit-user-select: none;
       transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s;
-      touch-action: pan-y; /* Разрешаем вертикальный скролл, блокируя случайные жесты */
+      touch-action: pan-y;
     }
 
     .card:active {
@@ -1203,12 +1210,14 @@
       if (!text) return;
 
       const now = new Date();
-      const timeString = now.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }) + ' в ' + now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      // Выставление даты и времени до секунд (формат: ДД.ММ.ГГГГ в ЧЧ:ММ:СС)
+      const timeString = now.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
       const newTweet = {
         id: Date.now(),
         type: 'diary',
         createdAt: timeString,
+        isEdited: false, // Флаг изменения заметки
         data: { text: text }
       };
 
@@ -1300,17 +1309,17 @@
       const widget = widgets.find(w => w.id === id);
       if (widget) {
         widget.data.text = newText;
+        widget.isEdited = true; // Фиксируем, что текст был изменен
         saveAndRender();
       }
     }
 
-    // --- УЛУЧШЕННАЯ ЛОГИКА ПЕРЕМЕЩЕНИЯ ВИДЖЕТОВ (ПК Drag & Drop + Мобильный Smart Touch) ---
+    // --- ЛОГИКА ПЕРЕМЕЩЕНИЯ ВИДЖЕТОВ (ПК Drag & Drop + Мобильный Smart Touch) ---
     let draggedId = null;
 
     function setupDragAndDropForCard(cardElement, id) {
       cardElement.setAttribute('draggable', 'true');
 
-      // Стандартный Desktop Drag-and-Drop
       cardElement.addEventListener('dragstart', (e) => {
         draggedId = id;
         setTimeout(() => cardElement.classList.add('dragging'), 0);
@@ -1345,7 +1354,6 @@
         }
       });
 
-      // Мобильный свайп-контроль (Touch) с защитой от случайных скроллов
       let touchTimeout = null;
       let startX = 0;
       let startY = 0;
@@ -1361,7 +1369,6 @@
         startY = touch.clientY;
         isTouchActive = false;
 
-        // Задержка 80мс перед активацией свайпа (чтобы обычный скролл страницы работал без рывков)
         touchTimeout = setTimeout(() => {
           isTouchActive = true;
           draggedId = id;
@@ -1376,7 +1383,6 @@
         const moveX = Math.abs(touch.clientX - startX);
         const moveY = Math.abs(touch.clientY - startY);
 
-        // Если пользователь явно делает скролл вверх-вниз — отменяем захват
         if (moveY > 15 && moveY > moveX && !isTouchActive) {
           clearTimeout(touchTimeout);
           touchTimeout = null;
@@ -1384,7 +1390,7 @@
         }
 
         if (isTouchActive) {
-          e.preventDefault(); // Блокируем скролл только когда виджет начал перетаскиваться
+          e.preventDefault();
           const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
           const targetCard = elementUnder ? elementUnder.closest('.card') : null;
 
@@ -1431,7 +1437,6 @@
         saveAndRender();
       }
     }
-    // --------------------------------------------------------------------------
 
     function render() {
       const mainGrid = document.getElementById('mainDashboard');
@@ -1476,13 +1481,19 @@
           readMoreBtnHtml = `<button class="read-more-btn" onclick="toggleReadMore(${w.id})">скрыть</button>`;
         }
 
+        // Формируем пометку об изменении, если запись редактировалась
+        const editedLabelHtml = w.isEdited ? `<span class="tweet-edited-label">(изменено)</span>` : '';
+
         const tweetItem = document.createElement('div');
         tweetItem.className = 'tweet-item';
         tweetItem.id = 'tweet-item-' + w.id;
 
         tweetItem.innerHTML = `
           <div class="tweet-top-row">
-            <span>${w.createdAt || 'Только что'}</span>
+            <div>
+              <span>${w.createdAt || 'Только что'}</span>
+              ${editedLabelHtml}
+            </div>
             <div style="position: relative;">
               <button class="tweet-menu-btn" onclick="toggleTweetMenu(event, ${w.id})" title="Опции">•••</button>
               <div id="menu-${w.id}" class="tweet-dropdown-menu">
