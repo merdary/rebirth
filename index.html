@@ -821,8 +821,8 @@
   <!-- Модальное окно пополнения финансовой цели -->
   <div id="addSavingsModal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-text" style="font-weight: 600; color: #fff;">Пополнить цель</div>
-      <div class="modal-text" style="font-size: 0.85rem; color: var(--text-muted);">Введите сумму, которую хотите добавить (или списать со знаком минус, например: -1000)</div>
+      <div class="modal-text" style="font-weight: 600; color: #fff;">Пополнить / изменить накопления</div>
+      <div class="modal-text" style="font-size: 0.85rem; color: var(--text-muted);">Введите сумму для пополнения (можно со знаком минус, например: -1000) ИЛИ выберите точное значение ниже.</div>
       <input type="number" id="savingsAmountInput" class="widget-input" placeholder="Сумма (например, 5000)">
       <div class="modal-buttons">
         <button onclick="closeSavingsModal()">Отмена</button>
@@ -1272,7 +1272,7 @@
       }
     });
 
-    // Управление пополнением цели
+    // Управление пополнением и ручным изменением цели
     function openSavingsModal(id) {
       activeSavingsWidgetId = id;
       document.getElementById('savingsAmountInput').value = '';
@@ -1303,6 +1303,17 @@
         }
       }
       closeSavingsModal();
+    }
+
+    // Ручное обновление накопленной суммы прямо из инпута на карточке
+    function updateSavingsCurrent(id, val) {
+      const widget = widgets.find(w => w.id === id);
+      if (widget) {
+        const parsed = parseFloat(val);
+        widget.data.current = isNaN(parsed) ? 0 : parsed;
+        if (widget.data.current < 0) widget.data.current = 0;
+        saveAndRender();
+      }
     }
 
     function toggleUserProfileMenu(e) {
@@ -1636,7 +1647,7 @@
             <div>
               <div class="savings-row">
                 <span>Накоплено:</span>
-                <span class="savings-values">${current.toLocaleString('ru-RU')} ₽</span>
+                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${current}" onchange="updateSavingsCurrent(${w.id}, this.value)">
               </div>
               <div class="savings-row">
                 <span>Цель:</span>
