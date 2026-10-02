@@ -618,7 +618,7 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
       text-align: center;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
     }
 
     .timer-box {
@@ -638,6 +638,13 @@
       font-size: 0.6rem;
       color: var(--text-muted);
       text-transform: uppercase;
+    }
+
+    .counter-start-info {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 4px 0 2px 0;
     }
 
     .progress-bar {
@@ -1210,14 +1217,13 @@
       if (!text) return;
 
       const now = new Date();
-      // Выставление даты и времени до секунд (формат: ДД.ММ.ГГГГ в ЧЧ:ММ:СС)
       const timeString = now.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
       const newTweet = {
         id: Date.now(),
         type: 'diary',
         createdAt: timeString,
-        isEdited: false, // Флаг изменения заметки
+        isEdited: false,
         data: { text: text }
       };
 
@@ -1309,7 +1315,7 @@
       const widget = widgets.find(w => w.id === id);
       if (widget) {
         widget.data.text = newText;
-        widget.isEdited = true; // Фиксируем, что текст был изменен
+        widget.isEdited = true;
         saveAndRender();
       }
     }
@@ -1481,7 +1487,6 @@
           readMoreBtnHtml = `<button class="read-more-btn" onclick="toggleReadMore(${w.id})">скрыть</button>`;
         }
 
-        // Формируем пометку об изменении, если запись редактировалась
         const editedLabelHtml = w.isEdited ? `<span class="tweet-edited-label">(изменено)</span>` : '';
 
         const tweetItem = document.createElement('div');
@@ -1546,24 +1551,31 @@
               </div>
             `;
           } else {
+            // Красиво форматируем дату старта для отображения под счетчиком
+            const startDateObj = new Date(w.data.startTime);
+            const formattedStartDate = startDateObj.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + startDateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
             bodyHTML = `
-              <div class="counter-timer-grid" id="timer-grid-${w.id}">
-                <div class="timer-box">
-                  <div class="timer-num" id="t-days-${w.id}">0</div>
-                  <div class="timer-label">дней</div>
+              <div>
+                <div class="counter-timer-grid" id="timer-grid-${w.id}">
+                  <div class="timer-box">
+                    <div class="timer-num" id="t-days-${w.id}">0</div>
+                    <div class="timer-label">дней</div>
+                  </div>
+                  <div class="timer-box">
+                    <div class="timer-num" id="t-hours-${w.id}">00</div>
+                    <div class="timer-label">часов</div>
+                  </div>
+                  <div class="timer-box">
+                    <div class="timer-num" id="t-mins-${w.id}">00</div>
+                    <div class="timer-label">минут</div>
+                  </div>
+                  <div class="timer-box">
+                    <div class="timer-num" id="t-secs-${w.id}">00</div>
+                    <div class="timer-label">секунд</div>
+                  </div>
                 </div>
-                <div class="timer-box">
-                  <div class="timer-num" id="t-hours-${w.id}">00</div>
-                  <div class="timer-label">часов</div>
-                </div>
-                <div class="timer-box">
-                  <div class="timer-num" id="t-mins-${w.id}">00</div>
-                  <div class="timer-label">минут</div>
-                </div>
-                <div class="timer-box">
-                  <div class="timer-num" id="t-secs-${w.id}">00</div>
-                  <div class="timer-label">секунд</div>
-                </div>
+                <div class="counter-start-info">Начало: ${formattedStartDate}</div>
               </div>
             `;
           }
