@@ -48,6 +48,7 @@
       max-width: 1200px;
       margin: 0 auto;
       min-height: 100vh;
+      overscroll-behavior-y: contain; /* Блокировка системного свайп-рефреша страницы */
     }
 
     .brand-logo {
@@ -548,7 +549,9 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       cursor: grab;
       user-select: none;
+      -webkit-user-select: none;
       transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s;
+      touch-action: pan-y; /* Разрешаем вертикальный скролл, блокируя случайные жесты */
     }
 
     .card:active {
@@ -1027,7 +1030,6 @@
       }
     }
 
-    // Функции модального окна восстановления пароля
     function openForgotModal() {
       document.getElementById('forgotError').innerText = '';
       document.getElementById('forgotEmailInput').value = document.getElementById('loginEmail').value;
@@ -1302,12 +1304,13 @@
       }
     }
 
-    // --- ЛОГИКА ПЕРЕМЕЩЕНИЯ ВИДЖЕТОВ (DRAG & DROP для ПК и Touch для телефонов) ---
+    // --- УЛУЧШЕННАЯ ЛОГИКА ПЕРЕМЕЩЕНИЯ ВИДЖЕТОВ (ПК Drag & Drop + Мобильный Smart Touch) ---
     let draggedId = null;
 
     function setupDragAndDropForCard(cardElement, id) {
       cardElement.setAttribute('draggable', 'true');
 
+      // Стандартный Desktop Drag-and-Drop
       cardElement.addEventListener('dragstart', (e) => {
         draggedId = id;
         setTimeout(() => cardElement.classList.add('dragging'), 0);
@@ -1342,29 +1345,64 @@
         }
       });
 
+      // Мобильный свайп-контроль (Touch) с защитой от случайных скроллов
+      let touchTimeout = null;
+      let startX = 0;
+      let startY = 0;
+      let isTouchActive = false;
+
       cardElement.addEventListener('touchstart', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON' || e.target.isContentEditable) {
+        if (e.target.closest('input, textarea, button, [contenteditable="true"]')) {
           return;
         }
-        draggedId = id;
-        cardElement.classList.add('dragging');
+
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isTouchActive = false;
+
+        // Задержка 80мс перед активацией свайпа (чтобы обычный скролл страницы работал без рывков)
+        touchTimeout = setTimeout(() => {
+          isTouchActive = true;
+          draggedId = id;
+          cardElement.classList.add('dragging');
+        }, 80);
       }, { passive: true });
 
       cardElement.addEventListener('touchmove', (e) => {
-        if (draggedId !== id) return;
+        if (!touchTimeout) return;
         
         const touch = e.touches[0];
-        const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
-        const targetCard = elementUnder ? elementUnder.closest('.card') : null;
+        const moveX = Math.abs(touch.clientX - startX);
+        const moveY = Math.abs(touch.clientY - startY);
 
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
-        if (targetCard && targetCard !== cardElement) {
-          targetCard.classList.add('drag-over');
+        // Если пользователь явно делает скролл вверх-вниз — отменяем захват
+        if (moveY > 15 && moveY > moveX && !isTouchActive) {
+          clearTimeout(touchTimeout);
+          touchTimeout = null;
+          return;
         }
-      }, { passive: true });
+
+        if (isTouchActive) {
+          e.preventDefault(); // Блокируем скролл только когда виджет начал перетаскиваться
+          const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetCard = elementUnder ? elementUnder.closest('.card') : null;
+
+          document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
+          if (targetCard && targetCard !== cardElement) {
+            targetCard.classList.add('drag-over');
+          }
+        }
+      }, { passive: false });
 
       cardElement.addEventListener('touchend', (e) => {
-        if (draggedId !== id) return;
+        if (touchTimeout) {
+          clearTimeout(touchTimeout);
+          touchTimeout = null;
+        }
+
+        if (!isTouchActive) return;
+        isTouchActive = false;
         cardElement.classList.remove('dragging');
 
         const touch = e.changedTouches[0];
