@@ -495,7 +495,6 @@
       white-space: pre-wrap;
     }
 
-    /* Медиа в заметках */
     .tweet-media-container {
       margin-top: 4px;
       border-radius: 8px;
@@ -639,7 +638,6 @@
       color: var(--danger-color) !important;
     }
 
-    /* Виджеты с поддержкой перемещения Drag and Drop */
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -1338,6 +1336,55 @@
       }
     }
 
+    // Функция автоматического сжатия картинок перед отправкой
+    async function compressImage(file) {
+      return new Promise((resolve) => {
+        if (!file.type.startsWith('image/')) {
+          resolve(file); // Если это видео или документ, возвращаем как есть
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 1280;
+            const MAX_HEIGHT = 1280;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            }, 'image/jpeg', 0.80);
+          };
+        };
+      });
+    }
+
     async function postNewTweet() {
       const input = document.getElementById('newTweetText');
       const text = input.value.trim();
@@ -1349,17 +1396,35 @@
       let fileType = null;
 
       if (selectedFileToUpload) {
-        syncStatus.innerText = '● Загр. файл...';
+        syncStatus.innerText = '● Загр. 0%';
         syncStatus.style.color = 'var(--warning-color)';
+        
         try {
-          const file = selectedFileToUpload;
+          const file = await compressImage(selectedFileToUpload);
           fileName = file.name;
-          fileType = file.type; // image/..., video/...
+          fileType = file.type;
 
           const filePath = 'users/' + currentUser.uid + '/notes/' + Date.now() + '_' + fileName;
           const fileRef = storage.ref().child(filePath);
-          const snapshot = await fileRef.put(file);
-          fileUrl = await snapshot.ref.getDownloadURL();
+          
+          const uploadTask = fileRef.put(file);
+
+          fileUrl = await new Promise((resolve, reject) => {
+            uploadTask.on('state_changed', 
+              (snapshot) => {
+                const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                syncStatus.innerText = `● Загр. ${progress}%`;
+              }, 
+              (error) => {
+                reject(error);
+              }, 
+              async () => {
+                const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                resolve(downloadUrl);
+              }
+            );
+          });
+
         } catch (err) {
           console.error("File upload error:", err);
           alert('Ошибка при загрузке файла');
@@ -1418,7 +1483,6 @@
       }
     });
 
-    // Управление пополнением и ручным изменением цели
     function openSavingsModal(id) {
       activeSavingsWidgetId = id;
       document.getElementById('savingsAmountInput').value = '';
@@ -1524,7 +1588,6 @@
       }
     }
 
-    // --- ЛОГИКА ПЕРЕМЕЩЕНИЯ ВИДЖЕТОВ (ПК Drag & Drop + Мобильный Smart Touch) ---
     let draggedId = null;
 
     function setupDragAndDropForCard(cardElement, id) {
@@ -1693,7 +1756,6 @@
 
         const editedLabelHtml = w.isEdited ? `<span class="tweet-edited-label">(изменено)</span>` : '';
 
-        // Блок рендеринга прикрепленного файла/фото/видео
         let mediaHtml = '';
         if (w.data.fileUrl) {
           const fType = w.data.fileType || '';
