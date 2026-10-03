@@ -16,6 +16,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
   <style>
     :root {
@@ -366,6 +367,13 @@
     .telegram-input-box {
       position: relative;
       display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .telegram-textarea-wrapper {
+      position: relative;
+      display: flex;
       align-items: center;
     }
 
@@ -410,6 +418,38 @@
       fill: currentColor;
     }
 
+    .tweet-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .attach-file-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .attach-file-btn:hover {
+      background-color: var(--card-hover);
+      color: #ffffff;
+      border-color: var(--accent-color);
+    }
+
+    .attach-preview-name {
+      font-size: 0.75rem;
+      color: var(--accent-color);
+      word-break: break-all;
+    }
+
     .twitter-divider {
       height: 1px;
       background-color: var(--border-color);
@@ -429,7 +469,7 @@
       padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       position: relative;
     }
 
@@ -453,6 +493,61 @@
       color: var(--text-main);
       word-break: break-word;
       white-space: pre-wrap;
+    }
+
+    /* Медиа в заметках */
+    .tweet-media-container {
+      margin-top: 4px;
+      border-radius: 8px;
+      overflow: hidden;
+      max-height: 250px;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .tweet-media-container img,
+    .tweet-media-container video {
+      max-width: 100%;
+      max-height: 250px;
+      object-fit: contain;
+    }
+
+    .tweet-file-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-top: 4px;
+    }
+
+    .tweet-file-info {
+      font-size: 0.8rem;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-right: 8px;
+    }
+
+    .download-file-btn {
+      background-color: var(--accent-color);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .download-file-btn:hover {
+      background-color: var(--accent-hover);
     }
 
     .read-more-btn {
@@ -720,12 +815,6 @@
       color: var(--text-muted);
     }
 
-    .savings-values {
-      font-weight: 600;
-      color: #ffffff;
-      font-size: 0.95rem;
-    }
-
     .task-list {
       display: flex;
       flex-direction: column;
@@ -925,10 +1014,20 @@
           <div class="tweet-creator-label">Написать новую заметку</div>
           
           <div class="telegram-input-box">
-            <textarea id="newTweetText" class="widget-input" placeholder="Что нового?" rows="2" onkeydown="handleKeySend(event)"></textarea>
-            <button class="telegram-send-btn" onclick="postNewTweet()" title="Отправить">
-              <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-            </button>
+            <div class="telegram-textarea-wrapper">
+              <textarea id="newTweetText" class="widget-input" placeholder="Что нового?" rows="2" onkeydown="handleKeySend(event)"></textarea>
+              <button class="telegram-send-btn" onclick="postNewTweet()" title="Отправить">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+              </button>
+            </div>
+            
+            <div class="tweet-actions-row">
+              <input type="file" id="tweetFileInput" style="display: none;" onchange="handleFileSelect(event)">
+              <button type="button" class="attach-file-btn" onclick="document.getElementById('tweetFileInput').click()">
+                📎 Прикрепить файл / фото
+              </button>
+              <span id="attachPreviewName" class="attach-preview-name"></span>
+            </div>
           </div>
 
           <div class="twitter-divider" id="tweetsDivider" style="display: none;"></div>
@@ -956,6 +1055,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage();
 
     let currentUser = null;
     let widgets = [];
@@ -966,6 +1066,7 @@
     let timerInterval = null;
     let pendingDeleteId = null;
     let activeSavingsWidgetId = null;
+    let selectedFileToUpload = null;
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -1226,10 +1327,47 @@
       }
     }
 
-    function postNewTweet() {
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        selectedFileToUpload = file;
+        document.getElementById('attachPreviewName').innerText = '📁 ' + file.name;
+      } else {
+        selectedFileToUpload = null;
+        document.getElementById('attachPreviewName').innerText = '';
+      }
+    }
+
+    async function postNewTweet() {
       const input = document.getElementById('newTweetText');
       const text = input.value.trim();
-      if (!text) return;
+      if (!text && !selectedFileToUpload) return;
+
+      const syncStatus = document.getElementById('syncStatus');
+      let fileUrl = null;
+      let fileName = null;
+      let fileType = null;
+
+      if (selectedFileToUpload) {
+        syncStatus.innerText = '● Загр. файл...';
+        syncStatus.style.color = 'var(--warning-color)';
+        try {
+          const file = selectedFileToUpload;
+          fileName = file.name;
+          fileType = file.type; // image/..., video/...
+
+          const filePath = 'users/' + currentUser.uid + '/notes/' + Date.now() + '_' + fileName;
+          const fileRef = storage.ref().child(filePath);
+          const snapshot = await fileRef.put(file);
+          fileUrl = await snapshot.ref.getDownloadURL();
+        } catch (err) {
+          console.error("File upload error:", err);
+          alert('Ошибка при загрузке файла');
+          syncStatus.innerText = '● Ошибка';
+          syncStatus.style.color = 'var(--danger-color)';
+          return;
+        }
+      }
 
       const now = new Date();
       const timeString = now.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -1239,11 +1377,19 @@
         type: 'diary',
         createdAt: timeString,
         isEdited: false,
-        data: { text: text }
+        data: {
+          text: text,
+          fileUrl: fileUrl,
+          fileName: fileName,
+          fileType: fileType
+        }
       };
 
       widgets.unshift(newTweet);
       input.value = '';
+      selectedFileToUpload = null;
+      document.getElementById('tweetFileInput').value = '';
+      document.getElementById('attachPreviewName').innerText = '';
       currentTweetPage = 1;
       saveAndRender();
     }
@@ -1305,7 +1451,6 @@
       closeSavingsModal();
     }
 
-    // Ручное обновление накопленной суммы прямо из инпута на карточке
     function updateSavingsCurrent(id, val) {
       const widget = widgets.find(w => w.id === id);
       if (widget) {
@@ -1356,7 +1501,7 @@
       itemNode.innerHTML = `
         <div class="tweet-top-row">
           <span>${widget.createdAt || ''}</span>
-          <span style="font-size: 0.75rem; color: var(--accent-color);">Редактирование...</span>
+          <span style="font-size: 0.75rem; color: var(--accent-color);">Редактирование текста...</span>
         </div>
         <textarea id="edit-text-${id}" class="widget-input" rows="2">${widget.data.text || ''}</textarea>
         <div class="btn-group" style="margin-top: 6px;">
@@ -1548,6 +1693,40 @@
 
         const editedLabelHtml = w.isEdited ? `<span class="tweet-edited-label">(изменено)</span>` : '';
 
+        // Блок рендеринга прикрепленного файла/фото/видео
+        let mediaHtml = '';
+        if (w.data.fileUrl) {
+          const fType = w.data.fileType || '';
+          const fName = w.data.fileName || 'файл';
+
+          if (fType.startsWith('image/')) {
+            mediaHtml = `
+              <div class="tweet-media-container">
+                <img src="${w.data.fileUrl}" alt="Фото">
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+                <a href="${w.data.fileUrl}" target="_blank" download="${fName}" class="download-file-btn">Скачать фото</a>
+              </div>
+            `;
+          } else if (fType.startsWith('video/')) {
+            mediaHtml = `
+              <div class="tweet-media-container">
+                <video controls src="${w.data.fileUrl}"></video>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+                <a href="${w.data.fileUrl}" target="_blank" download="${fName}" class="download-file-btn">Скачать видео</a>
+              </div>
+            `;
+          } else {
+            mediaHtml = `
+              <div class="tweet-file-box">
+                <span class="tweet-file-info" title="${fName}">📎 ${fName}</span>
+                <a href="${w.data.fileUrl}" target="_blank" download="${fName}" class="download-file-btn">Скачать</a>
+              </div>
+            `;
+          }
+        }
+
         const tweetItem = document.createElement('div');
         tweetItem.className = 'tweet-item';
         tweetItem.id = 'tweet-item-' + w.id;
@@ -1566,8 +1745,9 @@
               </div>
             </div>
           </div>
-          <div class="tweet-text-content">${displayHtmlText}</div>
-          ${readMoreBtnHtml}
+          ${text ? `<div class="tweet-text-content">${displayHtmlText}</div>` : ''}
+          ${text && isLong ? readMoreBtnHtml : ''}
+          ${mediaHtml}
         `;
         twitterTweetsList.appendChild(tweetItem);
       });
