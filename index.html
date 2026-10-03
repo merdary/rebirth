@@ -1396,7 +1396,7 @@
       let fileType = null;
 
       if (selectedFileToUpload) {
-        syncStatus.innerText = '● Загр. 0%';
+        syncStatus.innerText = '● Загрузка...';
         syncStatus.style.color = 'var(--warning-color)';
         
         try {
@@ -1407,27 +1407,15 @@
           const filePath = 'users/' + currentUser.uid + '/notes/' + Date.now() + '_' + fileName;
           const fileRef = storage.ref().child(filePath);
           
-          const uploadTask = fileRef.put(file);
+          // Стабильный прямой метод загрузки
+          const snapshot = await fileRef.put(file);
+          fileUrl = await snapshot.ref.getDownloadURL();
 
-          fileUrl = await new Promise((resolve, reject) => {
-            uploadTask.on('state_changed', 
-              (snapshot) => {
-                const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                syncStatus.innerText = `● Загр. ${progress}%`;
-              }, 
-              (error) => {
-                reject(error);
-              }, 
-              async () => {
-                const downloadUrl = await uploadTask.snapshot.ref.getDownloadURL();
-                resolve(downloadUrl);
-              }
-            );
-          });
-
+          syncStatus.innerText = '● Синхр.';
+          syncStatus.style.color = 'var(--success-color)';
         } catch (err) {
-          console.error("File upload error:", err);
-          alert('Ошибка при загрузке файла');
+          console.error("File upload error details:", err);
+          alert('Ошибка при загрузке файла: ' + (err.message || 'не удалось отправить'));
           syncStatus.innerText = '● Ошибка';
           syncStatus.style.color = 'var(--danger-color)';
           return;
