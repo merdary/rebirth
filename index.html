@@ -118,8 +118,9 @@
     }
 
     .auth-tab-btn.active {
-      background-color: var(--accent-color);
+      background-color: var(--card-hover);
       color: #ffffff;
+      border: 1px solid var(--border-color);
     }
 
     .auth-form {
@@ -140,7 +141,7 @@
 
     .auth-input:focus {
       outline: none;
-      border-color: var(--accent-color);
+      border-color: var(--text-muted);
     }
 
     .auth-error {
@@ -164,7 +165,7 @@
     }
 
     .forgot-password-link:hover {
-      color: var(--accent-color);
+      color: #ffffff;
     }
 
     /* Главный экран */
@@ -384,16 +385,16 @@
 
     .telegram-input-box textarea:focus {
       outline: none;
-      border-color: var(--accent-color);
+      border-color: var(--text-muted);
     }
 
     .telegram-send-btn {
       position: absolute;
       right: 8px;
       bottom: 8px;
-      background-color: var(--accent-color);
+      background-color: var(--card-hover);
       color: #ffffff;
-      border: none;
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       width: 32px;
       height: 32px;
@@ -402,6 +403,10 @@
       justify-content: center;
       cursor: pointer;
       transition: background-color 0.2s;
+    }
+    
+    .telegram-send-btn:hover {
+      background-color: var(--border-color);
     }
 
     .telegram-send-btn svg {
@@ -458,13 +463,16 @@
     .read-more-btn {
       background: none;
       border: none;
-      color: var(--accent-color);
+      color: var(--text-muted);
       font-size: 0.8rem;
       font-weight: 500;
       cursor: pointer;
       padding: 4px 0;
       margin-top: 2px;
       text-align: left;
+    }
+    .read-more-btn:hover {
+      color: #ffffff;
     }
 
     .pagination-container {
@@ -485,9 +493,9 @@
     }
 
     .page-btn.active {
-      background-color: var(--accent-color);
+      background-color: var(--card-hover);
       color: #ffffff;
-      border-color: var(--accent-color);
+      border-color: var(--border-color);
       font-weight: 600;
     }
 
@@ -568,11 +576,11 @@
     .card.dragging {
       opacity: 0.4;
       transform: scale(0.97);
-      border-color: var(--accent-color);
+      border-color: var(--text-muted);
     }
 
     .card.drag-over {
-      border-color: var(--accent-color);
+      border-color: var(--text-muted);
       background-color: var(--card-hover);
       transform: translateY(-2px);
     }
@@ -675,10 +683,18 @@
       transition: all 0.2s;
     }
 
+    button:hover {
+      background-color: var(--border-color);
+    }
+
     button.primary {
-      background-color: var(--accent-color);
+      background-color: var(--card-hover);
       color: #ffffff;
-      border: none;
+      border: 1px solid var(--border-color);
+    }
+    
+    button.primary:hover {
+      background-color: var(--border-color);
     }
 
     button.danger {
@@ -708,7 +724,7 @@
 
     .widget-input:focus {
       outline: none;
-      border-color: var(--accent-color);
+      border-color: var(--text-muted);
     }
 
     .savings-row {
@@ -742,7 +758,7 @@
     .task-item input[type="checkbox"] {
       width: 20px;
       height: 20px;
-      accent-color: var(--accent-color);
+      accent-color: var(--text-muted);
       cursor: pointer;
       flex-shrink: 0;
     }
@@ -1356,7 +1372,7 @@
       itemNode.innerHTML = `
         <div class="tweet-top-row">
           <span>${widget.createdAt || ''}</span>
-          <span style="font-size: 0.75rem; color: var(--accent-color);">Редактирование...</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Редактирование...</span>
         </div>
         <textarea id="edit-text-${id}" class="widget-input" rows="2">${widget.data.text || ''}</textarea>
         <div class="btn-group" style="margin-top: 6px;">
