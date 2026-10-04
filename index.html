@@ -894,7 +894,7 @@
       color: var(--danger-color);
     }
 
-    /* Стили вкладки «Календарь» (График смен) */
+    /* Стили вкладки «Календарь» */
     .calendar-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -1069,7 +1069,7 @@
   <div id="addSavingsModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-text" style="font-weight: 600; color: #fff;">Пополнить / изменить накопления</div>
-      <div class="modal-text" style="font-size: 0.85rem; color: var(--text-muted);">Введите сумму для пополнения (можно со знаком минус, например: -1000) ИЛИ выберите точное значение ниже.</div>
+      <div class="modal-text" style="font-size: 0.85rem; color: var(--text-muted);">Введите сумму для пополнения (можно со знаком минус, например: -1000)</div>
       <input type="number" id="savingsAmountInput" class="widget-input" placeholder="Сумма (например, 5000)">
       <div class="modal-buttons">
         <button onclick="closeSavingsModal()">Отмена</button>
@@ -1082,7 +1082,7 @@
   <div id="calendarDayModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-text" id="calModalDateTitle" style="font-weight: 600; color: #fff;">Настройка дня</div>
-      <input type="text" id="calDayNoteInput" class="widget-input" placeholder="Название (например: Смена, Отгул)">
+      <input type="text" id="calDayNoteInput" class="widget-input" placeholder="Название">
       <div style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Выберите цвет метки:</div>
       <div class="color-picker-row">
         <div class="color-dot selected" style="background-color: #5865f2;" onclick="selectCalColor('#5865f2', this)"></div>
@@ -1174,7 +1174,7 @@
     <div class="tabs-nav-container" id="tabsNavContainer">
       <button class="tab-nav-btn active" data-tab="widgets" draggable="true" onclick="switchTab('widgets')">📊 Виджеты</button>
       <button class="tab-nav-btn" data-tab="links" draggable="true" onclick="switchTab('links')">🔗 Быстрые ссылки</button>
-      <button class="tab-nav-btn" data-tab="calendar" draggable="true" onclick="switchTab('calendar')">📅 Календарь смен</button>
+      <button class="tab-nav-btn" data-tab="calendar" draggable="true" onclick="switchTab('calendar')">📅 Календарь</button>
     </div>
 
     <!-- Вкладка 1: Виджеты -->
@@ -1502,7 +1502,7 @@
       const tabTitles = {
         widgets: '📊 Виджеты',
         links: '🔗 Быстрые ссылки',
-        calendar: '📅 Календарь смен'
+        calendar: '📅 Календарь'
       };
 
       tabOrder.forEach(tabId => {
