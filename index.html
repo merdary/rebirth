@@ -1364,7 +1364,7 @@
 
         await db.collection('users').doc(user.uid).collection('data').doc('widgets').set({
           list: [],
-          links: [{ name: 'GitHub', url: 'https://github.com' }, { name: 'YouTube', url: 'https://youtube.com' }],
+          links: [],
           shifts: {},
           tabOrder: ['widgets', 'links', 'calendar']
         });
