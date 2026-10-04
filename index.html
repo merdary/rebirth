@@ -266,7 +266,7 @@
       background-color: rgba(242, 63, 67, 0.1);
     }
 
-    /* Навигация по вкладкам */
+    /* Навигация по вкладкам (с поддержкой Drag & Drop) */
     .tabs-nav-container {
       display: flex;
       gap: 8px;
@@ -606,7 +606,7 @@
       color: var(--danger-color) !important;
     }
 
-    /* Карточки виджетов */
+    /* Карточки виджетов (Drag and Drop) */
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -821,7 +821,7 @@
       color: var(--text-muted);
     }
 
-    /* Стили вкладки «Быстрые ссылки» */
+    /* Стили вкладки «Быстрые ссылки» (полноразмерная) */
     .links-page-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -894,7 +894,7 @@
       color: var(--danger-color);
     }
 
-    /* Стили вкладки «Календарь» */
+    /* Стили вкладки «Календарь» (График смен) */
     .calendar-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -910,8 +910,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
     }
 
     .cal-title {
@@ -924,7 +922,6 @@
     .cal-nav-btns {
       display: flex;
       gap: 6px;
-      flex-wrap: wrap;
     }
 
     .cal-grid-weekdays {
@@ -1008,7 +1005,7 @@
       border-radius: 14px;
       padding: 20px;
       width: 100%;
-      max-width: 340px;
+      max-width: 320px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
@@ -1081,49 +1078,11 @@
     </div>
   </div>
 
-  <!-- Модальное окно создания графика смен -->
-  <div id="shiftScheduleModal" class="modal-overlay">
-    <div class="modal-card" style="text-align: left;">
-      <div class="modal-text" style="font-weight: 600; color: #fff; text-align: center;">Создание графика смен</div>
-      <div class="modal-text" style="font-size: 0.85rem; color: var(--text-muted);">Настройте последовательность чередования (по умолчанию задан ваш шаблон: 2 работы, 2 выходных, 2 ночных, 2 выходных):</div>
-      
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <label style="font-size: 0.8rem; color: var(--text-muted);">Шаги графика (через запятую или по порядку):</label>
-        <div style="display: flex; gap: 6px;">
-          <input type="text" id="shiftStep1" class="widget-input" value="День" placeholder="Шаг 1" style="flex:1;">
-          <input type="text" id="shiftStep2" class="widget-input" value="День" placeholder="Шаг 2" style="flex:1;">
-        </div>
-        <div style="display: flex; gap: 6px;">
-          <input type="text" id="shiftStep3" class="widget-input" value="Выходной" placeholder="Шаг 3" style="flex:1;">
-          <input type="text" id="shiftStep4" class="widget-input" value="Выходной" placeholder="Шаг 4" style="flex:1;">
-        </div>
-        <div style="display: flex; gap: 6px;">
-          <input type="text" id="shiftStep5" class="widget-input" value="Ночь" placeholder="Шаг 5" style="flex:1;">
-          <input type="text" id="shiftStep6" class="widget-input" value="Ночь" placeholder="Шаг 6" style="flex:1;">
-        </div>
-        <div style="display: flex; gap: 6px;">
-          <input type="text" id="shiftStep7" class="widget-input" value="Выходной" placeholder="Шаг 7" style="flex:1;">
-          <input type="text" id="shiftStep8" class="widget-input" value="Выходной" placeholder="Шаг 8" style="flex:1;">
-        </div>
-      </div>
-
-      <div style="margin-top: 4px;">
-        <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">С какой даты начать:</label>
-        <input type="date" id="shiftStartDate" class="widget-input">
-      </div>
-
-      <div class="modal-buttons" style="margin-top: 8px;">
-        <button onclick="closeShiftScheduleModal()">Отмена</button>
-        <button class="primary" onclick="applyShiftSchedule()">Выставить на месяц</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Модальное окно настройки дня в календаре -->
   <div id="calendarDayModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-text" id="calModalDateTitle" style="font-weight: 600; color: #fff;">Настройка дня</div>
-      <input type="text" id="calDayNoteInput" class="widget-input" placeholder="Название или примечание">
+      <input type="text" id="calDayNoteInput" class="widget-input" placeholder="Название">
       <div style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Выберите цвет метки:</div>
       <div class="color-picker-row">
         <div class="color-dot selected" style="background-color: #5865f2;" onclick="selectCalColor('#5865f2', this)"></div>
@@ -1211,7 +1170,7 @@
       </div>
     </header>
 
-    <!-- Навигация по вкладкам -->
+    <!-- Навигация по вкладкам (можно менять местами Drag & Drop) -->
     <div class="tabs-nav-container" id="tabsNavContainer">
       <button class="tab-nav-btn active" data-tab="widgets" draggable="true" onclick="switchTab('widgets')">📊 Виджеты</button>
       <button class="tab-nav-btn" data-tab="links" draggable="true" onclick="switchTab('links')">🔗 Быстрые ссылки</button>
@@ -1271,7 +1230,6 @@
         <div class="cal-header-row">
           <div class="cal-title" id="calMonthTitle">Месяц Год</div>
           <div class="cal-nav-btns">
-            <button class="primary" onclick="openShiftScheduleModal()">График смен</button>
             <button onclick="changeCalendarMonth(-1)">‹ Назад</button>
             <button onclick="resetCalendarToCurrent()">Сегодня</button>
             <button onclick="changeCalendarMonth(1)">Вперед ›</button>
@@ -1371,6 +1329,7 @@
       try {
         await auth.signInWithEmailAndPassword(email, password);
       } catch (error) {
+        console.error("Login Error:", error.code);
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
           loginError.innerText = 'неверный логин или пароль';
         } else {
@@ -1406,6 +1365,7 @@
         });
 
       } catch (error) {
+        console.error("Register Error:", error.code);
         if (error.code === 'auth/email-already-in-use') {
           regError.innerText = 'пользователь уже зарегистрирован';
         } else if (error.code === 'auth/weak-password') {
@@ -1441,6 +1401,7 @@
         alert('Инструкции по восстановлению пароля отправлены на почту: ' + email);
         closeForgotModal();
       } catch (error) {
+        console.error("Reset Password Error:", error.code);
         if (error.code === 'auth/user-not-found') {
           forgotError.innerText = 'пользователь с такой почтой не найден';
         } else if (error.code === 'auth/invalid-email') {
@@ -1517,6 +1478,7 @@
       }
     }
 
+    // Управление вкладками
     function switchTab(tabId) {
       activeTab = tabId;
       document.querySelectorAll('.tab-content-pane').forEach(p => p.classList.remove('active'));
@@ -1556,6 +1518,7 @@
       });
     }
 
+    // Перетаскивание вкладок
     let draggedTabId = null;
 
     function setupTabDragAndDrop(btn, tabId) {
@@ -1601,6 +1564,7 @@
       }
     }
 
+    // Логика быстрых ссылок (вкладка)
     function addPageLinkItem() {
       const nameInput = document.getElementById('newPageLinkName');
       const urlInput = document.getElementById('newPageLinkUrl');
@@ -1653,14 +1617,15 @@
       titleEl.innerText = `${monthNames[month]} ${year}`;
 
       const firstDayOfMonth = new Date(year, month, 1);
-      let startingDay = firstDayOfMonth.getDay();
-      startingDay = (startingDay === 0) ? 6 : startingDay - 1;
+      let startingDay = firstDayOfMonth.getDay(); // 0 - ВС, 1 - ПН...
+      startingDay = (startingDay === 0) ? 6 : startingDay - 1; // Делаем ПН первым днем (0-6)
 
       const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
       const prevMonthDays = new Date(year, month, 0).getDate();
 
       let daysArray = [];
 
+      // Дни предыдущего месяца
       for (let i = startingDay - 1; i >= 0; i--) {
         const dNum = prevMonthDays - i;
         const prevMonth = month === 0 ? 11 : month - 1;
@@ -1672,6 +1637,7 @@
         });
       }
 
+      // Дни текущего месяца
       for (let i = 1; i <= totalDaysInMonth; i++) {
         daysArray.push({
           day: i,
@@ -1680,6 +1646,7 @@
         });
       }
 
+      // Дни следующего месяца до заполнения сетки (кратна 7)
       let nextMonthDay = 1;
       while (daysArray.length % 7 !== 0) {
         const nextMonth = month === 11 ? 0 : month + 1;
@@ -1712,66 +1679,6 @@
       });
     }
 
-    // Модальное окно графика смен
-    function openShiftScheduleModal() {
-      // Подставляем текущую дату по умолчанию в инпут выбора даты
-      const todayStr = new Date().toISOString().slice(0, 10);
-      document.getElementById('shiftStartDate').value = todayStr;
-      document.getElementById('shiftScheduleModal').classList.add('show');
-    }
-
-    function closeShiftScheduleModal() {
-      document.getElementById('shiftScheduleModal').classList.remove('show');
-    }
-
-    function applyShiftSchedule() {
-      const step1 = document.getElementById('shiftStep1').value.trim() || 'День';
-      const step2 = document.getElementById('shiftStep2').value.trim() || 'День';
-      const step3 = document.getElementById('shiftStep3').value.trim() || 'Выходной';
-      const step4 = document.getElementById('shiftStep4').value.trim() || 'Выходной';
-      const step5 = document.getElementById('shiftStep5').value.trim() || 'Ночь';
-      const step6 = document.getElementById('shiftStep6').value.trim() || 'Ночь';
-      const step7 = document.getElementById('shiftStep7').value.trim() || 'Выходной';
-      const step8 = document.getElementById('shiftStep8').value.trim() || 'Выходной';
-
-      const pattern = [
-        { text: step1, color: '#5865f2' },
-        { text: step2, color: '#5865f2' },
-        { text: step3, color: '#949ba4' },
-        { text: step4, color: '#949ba4' },
-        { text: step5, color: '#9b59b6' },
-        { text: step6, color: '#9b59b6' },
-        { text: step7, color: '#949ba4' },
-        { text: step8, color: '#949ba4' }
-      ].filter(s => s.text !== ''); // убираем пустые шаги если пользователь стер
-
-      const startDateVal = document.getElementById('shiftStartDate').value;
-      if (!startDateVal || pattern.length === 0) {
-        alert('Пожалуйста, укажите корректную дату и шаблон смен!');
-        return;
-      }
-
-      const startDate = new Date(startDateVal);
-      // Выставляем график ровно на 30 дней (1 месяц)
-      for (let i = 0; i < 30; i++) {
-        const targetDate = new Date(startDate);
-        targetDate.setDate(startDate.getDate() + i);
-
-        const yyyy = targetDate.getFullYear();
-        const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
-        const dd = String(targetDate.getDate()).padStart(2, '0');
-        const dateStr = `${yyyy}-${mm}-${dd}`;
-
-        const patternIndex = i % pattern.length;
-        calendarShifts[dateStr] = pattern[patternIndex];
-      }
-
-      saveAndRender();
-      renderCalendar();
-      closeShiftScheduleModal();
-    }
-
-    // Модальное окно отдельного дня
     function openCalendarDayModal(dateStr, dayNum, monthName, year) {
       selectedCalDateStr = dateStr;
       document.getElementById('calModalDateTitle').innerText = `${dayNum} ${monthName} ${year}`;
@@ -1780,8 +1687,9 @@
       document.getElementById('calDayNoteInput').value = existing.text || '';
       selectedCalColorHex = existing.color || '#5865f2';
 
+      // Подсветка выбранной точки цвета
       document.querySelectorAll('.color-dot').forEach(dot => {
-        if (dot.style.backgroundColor === selectedCalColorHex || dot.style.backgroundColor === hexToRgb(selectedCalColorHex)) {
+        if (dot.style.backgroundColor === hexToRgb(selectedCalColorHex) || dot.style.backgroundColor === selectedCalColorHex) {
           dot.classList.add('selected');
         } else {
           dot.classList.remove('selected');
@@ -1827,6 +1735,7 @@
     }
 
     function hexToRgb(hex) {
+      // Конвертер для проверки совпадений цветов
       return hex;
     }
 
@@ -2060,6 +1969,7 @@
       }
     }
 
+    // Drag & Drop для карточек виджетов
     let draggedId = null;
 
     function setupDragAndDropForCard(cardElement, id) {
@@ -2092,6 +2002,70 @@
           reorderWidgets(draggedId, id);
         }
       });
+
+      let touchTimeout = null;
+      let startX = 0, startY = 0;
+      let isTouchActive = false;
+
+      cardElement.addEventListener('touchstart', (e) => {
+        if (e.target.closest('input, textarea, button, [contenteditable="true"], a')) return;
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isTouchActive = false;
+
+        touchTimeout = setTimeout(() => {
+          isTouchActive = true;
+          draggedId = id;
+          cardElement.classList.add('dragging');
+        }, 80);
+      }, { passive: true });
+
+      cardElement.addEventListener('touchmove', (e) => {
+        if (!touchTimeout) return;
+        const touch = e.touches[0];
+        const moveX = Math.abs(touch.clientX - startX);
+        const moveY = Math.abs(touch.clientY - startY);
+
+        if (moveY > 15 && moveY > moveX && !isTouchActive) {
+          clearTimeout(touchTimeout);
+          touchTimeout = null;
+          return;
+        }
+
+        if (isTouchActive) {
+          e.preventDefault();
+          const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetCard = elementUnder ? elementUnder.closest('.card') : null;
+          document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
+          if (targetCard && targetCard !== cardElement) {
+            targetCard.classList.add('drag-over');
+          }
+        }
+      }, { passive: false });
+
+      cardElement.addEventListener('touchend', (e) => {
+        if (touchTimeout) {
+          clearTimeout(touchTimeout);
+          touchTimeout = null;
+        }
+        if (!isTouchActive) return;
+        isTouchActive = false;
+        cardElement.classList.remove('dragging');
+
+        const touch = e.changedTouches[0];
+        const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+        const targetCard = elementUnder ? elementUnder.closest('.card') : null;
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
+
+        if (targetCard) {
+          const targetId = parseInt(targetCard.getAttribute('data-id'));
+          if (targetId && targetId !== draggedId) {
+            reorderWidgets(draggedId, targetId);
+          }
+        }
+        draggedId = null;
+      });
     }
 
     function reorderWidgets(fromId, toId) {
@@ -2116,6 +2090,7 @@
       paginationContainer.innerHTML = '';
       linksPageGrid.innerHTML = '';
 
+      // Рендер быстрых ссылок на отдельной вкладке
       quickLinks.forEach((link, idx) => {
         let domain = '';
         try { domain = new URL(link.url).hostname; } catch(e) { domain = 'google.com'; }
@@ -2218,71 +2193,153 @@
           if (!w.data || !w.data.configured) {
             const defaultDateTime = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
             bodyHTML = `
-              <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; flex-direction: column; gap: 8px; margin: 6px 0 10px 0;">
+                <label style="font-size: 0.75rem; color: var(--text-muted);">Название счетчика:</label>
                 <input type="text" id="counter-name-${w.id}" class="widget-input" value="${w.title}">
+                
+                <label style="font-size: 0.75rem; color: var(--text-muted);">Дата и время начала:</label>
                 <input type="datetime-local" id="counter-date-${w.id}" class="widget-input" value="${defaultDateTime}">
-                <button class="primary" onclick="saveCounterConfig(${w.id})">Запустить</button>
+                
+                <button class="primary" style="margin-top: 4px;" onclick="saveCounterConfig(${w.id})">Начать</button>
               </div>
             `;
           } else {
+            const startDateObj = new Date(w.data.startTime);
+            const formattedStartDate = startDateObj.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + startDateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
             bodyHTML = `
-              <div class="counter-timer-grid" id="timer-grid-${w.id}">
-                <div class="timer-box"><div class="timer-num" id="t-days-${w.id}">0</div><div class="timer-label">дней</div></div>
-                <div class="timer-box"><div class="timer-num" id="t-hours-${w.id}">00</div><div class="timer-label">часов</div></div>
-                <div class="timer-box"><div class="timer-num" id="t-mins-${w.id}">00</div><div class="timer-label">минут</div></div>
-                <div class="timer-box"><div class="timer-num" id="t-secs-${w.id}">00</div><div class="timer-label">секунд</div></div>
+              <div>
+                <div class="counter-timer-grid" id="timer-grid-${w.id}">
+                  <div class="timer-box">
+                    <div class="timer-num" id="t-days-${w.id}">0</div>
+                    <div class="timer-label">дней</div>
+                  </div>
+                  <div class="timer-box">
+                    <div class="timer-num" id="t-hours-${w.id}">00</div>
+                    <div class="timer-label">часов</div>
+                  </div>
+                  <div class="timer-box">
+                    <div class="timer-num" id="t-mins-${w.id}">00</div>
+                    <div class="timer-label">минут</div>
+                  </div>
+                  <div class="timer-box">
+                    <div class="timer-num" id="t-secs-${w.id}">00</div>
+                    <div class="timer-label">секунд</div>
+                  </div>
+                </div>
+                <div class="counter-start-info">Начало: ${formattedStartDate}</div>
               </div>
-              <div class="counter-start-info">С ${new Date(w.data.startTime).toLocaleString('ru-RU', { dateStyle: 'medium', timeStyle: 'short' })}</div>
-              <button style="margin-top: 8px;" onclick="widgets.find(item => item.id === ${w.id}).data.configured = false; saveAndRender();">Изменить дату</button>
             `;
           }
-        } else if (w.type === 'savings') {
-          const cur = w.data.current || 0;
-          const target = w.data.target || 100000;
-          const pct = Math.min(Math.floor((cur / target) * 100), 100);
+        } 
+        else if (w.type === 'savings') {
+          const current = w.data.current || 0;
+          const target = w.data.target || 1;
+          const percent = Math.min(100, Math.round((current / target) * 100));
+          
           bodyHTML = `
-            <div class="savings-row">
-              <span>Собрано: <b>${cur.toLocaleString()} ₽</b></span>
-              <span>Цель: <b>${target.toLocaleString()} ₽</b></span>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-bottom: 8px;">Прогресс: ${pct}%</div>
-            <div class="btn-group">
-              <button class="primary" onclick="openSavingsModal(${w.id})">Пополнить</button>
+            <div>
+              <div class="savings-row">
+                <span>Накоплено:</span>
+                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${current}" onchange="updateSavingsCurrent(${w.id}, this.value)">
+              </div>
+              <div class="savings-row">
+                <span>Цель:</span>
+                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${target}" onchange="updateSavingsTarget(${w.id}, this.value)">
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${percent}%;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Прогресс: ${percent}%</span>
+                <button class="primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openSavingsModal(${w.id})">+ Пополнить</button>
+              </div>
             </div>
           `;
-        } else if (w.type === 'tasks') {
-          const tasks = w.data || [];
-          let tasksHtml = '<div class="task-list">';
-          tasks.forEach((t, tIdx) => {
-            tasksHtml += `
-              <div class="task-item ${t.done ? 'done' : ''}">
-                <input type="checkbox" ${t.done ? 'checked' : ''} onchange="const w = widgets.find(item => item.id === ${w.id}); w.data[${t.tIdx}].done = this.checked; saveAndRender();">
-                <input type="text" class="widget-input" value="${t.text}" oninput="const w = widgets.find(item => item.id === ${w.id}); w.data[${tIdx}].text = this.value; saveAndRender();">
-                <button class="btn-delete" style="padding: 2px 6px;" onclick="const w = widgets.find(item => item.id === ${w.id}); w.data.splice(${tIdx}, 1); saveAndRender();">&times;</button>
-              </div>
-            `;
-          });
-          tasksHtml += '</div>';
+        } 
+        else if (w.type === 'tasks') {
+          const itemsHTML = w.data.map((task, idx) => `
+            <div class="task-item ${task.done ? 'done' : ''}">
+              <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${w.id}, ${idx})">
+              <input type="text" class="widget-input" value="${task.text}" onchange="updateTaskText(${w.id}, ${idx}, this.value)">
+              <button class="btn-delete" onclick="removeTask(${w.id}, ${idx})">&times;</button>
+            </div>
+          `).join('');
+
           bodyHTML = `
-            ${tasksHtml}
-            <button class="primary" onclick="const w = widgets.find(item => item.id === ${w.id}); w.data.push({text: 'Новая задача', done: false}); saveAndRender();">+ Задача</button>
+            <div class="task-list">${itemsHTML}</div>
+            <button onclick="addTask(${w.id})" style="width: 100%;">+ Добавить задачу</button>
           `;
         }
 
+        const showTitleHeader = (w.type !== 'counter' || (w.data && w.data.configured));
+
         card.innerHTML = `
-          <div>
+          ${showTitleHeader ? `
             <div class="card-header">
-              <div class="card-title" contenteditable="true" onblur="const w = widgets.find(item => item.id === ${w.id}); if(w) { w.title = this.innerText.trim(); saveAndRender(); }">${w.title}</div>
-              <button class="btn-delete" onclick="promptDelete(${w.id})" title="Удалить виджет">&times;</button>
+              <span class="card-title" contenteditable="true" onblur="updateTitle(${w.id}, this.innerText)">${w.title}</span>
+              <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
             </div>
-            ${bodyHTML}
-          </div>
+          ` : `
+            <div class="card-header">
+              <span class="card-title">Настройка счетчика</span>
+              <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
+            </div>
+          `}
+          ${bodyHTML}
         `;
 
         setupDragAndDropForCard(card, w.id);
         mainGrid.appendChild(card);
       });
+    }
+
+    function updateTitle(id, newTitle) {
+      const widget = widgets.find(w => w.id === id);
+      if (widget) {
+        widget.title = newTitle;
+        saveAndRender();
+      }
+    }
+
+    function updateSavingsTarget(id, val) {
+      const widget = widgets.find(w => w.id === id);
+      if (widget) {
+        widget.data.target = parseFloat(val) || 1;
+        saveAndRender();
+      }
+    }
+
+    function addTask(id) {
+      const widget = widgets.find(w => w.id === id);
+      if (widget) {
+        widget.data.push({ text: 'Новая задача', done: false });
+        saveAndRender();
+      }
+    }
+
+    function toggleTask(id, idx) {
+      const widget = widgets.find(w => w.id === id);
+      if (widget) {
+        widget.data[idx].done = !widget.data[idx].done;
+        saveAndRender();
+      }
+    }
+
+    function updateTaskText(id, idx, val) {
+      const widget = widgets.find(w => w.id === id);
+      if (widget) {
+        widget.data[idx].text = val;
+        saveAndRender();
+      }
+    }
+
+    function removeTask(id, idx) {
+      const widget = widgets.find(w => w.id === id);
+      if (widget) {
+        widget.data.splice(idx, 1);
+        saveAndRender();
+      }
     }
   </script>
 </body>
