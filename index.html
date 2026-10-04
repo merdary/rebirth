@@ -266,7 +266,7 @@
       background-color: rgba(242, 63, 67, 0.1);
     }
 
-    /* Навигация по вкладкам (с поддержкой Drag & Drop) */
+    /* Навигация по вкладкам */
     .tabs-nav-container {
       display: flex;
       gap: 8px;
@@ -300,15 +300,6 @@
       background-color: var(--card-hover);
       color: #ffffff;
       border-color: var(--text-muted);
-    }
-
-    .tab-nav-btn.dragging {
-      opacity: 0.4;
-    }
-
-    .tab-nav-btn.drag-over {
-      border-color: var(--text-main);
-      background-color: var(--card-hover);
     }
 
     .tab-content-pane {
@@ -388,7 +379,6 @@
       }
     }
 
-    /* Лента заметок */
     .twitter-column {
       display: flex;
       flex-direction: column;
@@ -606,7 +596,6 @@
       color: var(--danger-color) !important;
     }
 
-    /* Карточки виджетов (Drag and Drop) */
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -821,7 +810,6 @@
       color: var(--text-muted);
     }
 
-    /* Стили вкладки «Быстрые ссылки» (полноразмерная) */
     .links-page-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -894,7 +882,7 @@
       color: var(--danger-color);
     }
 
-    /* Стили вкладки «Календарь» (График смен) */
+    /* Стили вкладки «Календарь» */
     .calendar-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -960,7 +948,8 @@
     }
 
     .cal-day-cell.other-month {
-      opacity: 0.35;
+      opacity: 0.2;
+      pointer-events: none; /* Запрещаем кликать по дням чужих месяцев */
     }
 
     .cal-day-num {
@@ -980,7 +969,6 @@
       font-weight: 500;
     }
 
-    /* Модальные окна */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -1170,7 +1158,6 @@
       </div>
     </header>
 
-    <!-- Навигация по вкладкам (можно менять местами Drag & Drop) -->
     <div class="tabs-nav-container" id="tabsNavContainer">
       <button class="tab-nav-btn active" data-tab="widgets" draggable="true" onclick="switchTab('widgets')">📊 Виджеты</button>
       <button class="tab-nav-btn" data-tab="links" draggable="true" onclick="switchTab('links')">🔗 Быстрые ссылки</button>
@@ -1262,7 +1249,7 @@
     let currentUser = null;
     let widgets = [];
     let quickLinks = [];
-    let calendarShifts = {}; // формат "YYYY-MM-DD": { text: "Смена", color: "#5865f2" }
+    let calendarShifts = {}; 
     let tabOrder = ['widgets', 'links', 'calendar'];
     let activeTab = 'widgets';
 
@@ -1274,7 +1261,6 @@
     let pendingDeleteId = null;
     let activeSavingsWidgetId = null;
 
-    // Состояние календаря
     let calDate = new Date();
     let selectedCalDateStr = null;
     let selectedCalColorHex = '#5865f2';
@@ -1322,14 +1308,12 @@
       e.preventDefault();
       const loginError = document.getElementById('loginError');
       loginError.innerText = '';
-
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
       try {
         await auth.signInWithEmailAndPassword(email, password);
       } catch (error) {
-        console.error("Login Error:", error.code);
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
           loginError.innerText = 'неверный логин или пароль';
         } else {
@@ -1365,7 +1349,6 @@
         });
 
       } catch (error) {
-        console.error("Register Error:", error.code);
         if (error.code === 'auth/email-already-in-use') {
           regError.innerText = 'пользователь уже зарегистрирован';
         } else if (error.code === 'auth/weak-password') {
@@ -1401,7 +1384,6 @@
         alert('Инструкции по восстановлению пароля отправлены на почту: ' + email);
         closeForgotModal();
       } catch (error) {
-        console.error("Reset Password Error:", error.code);
         if (error.code === 'auth/user-not-found') {
           forgotError.innerText = 'пользователь с такой почтой не найден';
         } else if (error.code === 'auth/invalid-email') {
@@ -1472,13 +1454,11 @@
         syncStatus.innerText = '● Синхр.';
         syncStatus.style.color = 'var(--success-color)';
       } catch (e) {
-        console.error("Error saving data:", e);
         syncStatus.innerText = '● Ошибка';
         syncStatus.style.color = 'var(--danger-color)';
       }
     }
 
-    // Управление вкладками
     function switchTab(tabId) {
       activeTab = tabId;
       document.querySelectorAll('.tab-content-pane').forEach(p => p.classList.remove('active'));
@@ -1518,7 +1498,6 @@
       });
     }
 
-    // Перетаскивание вкладок
     let draggedTabId = null;
 
     function setupTabDragAndDrop(btn, tabId) {
@@ -1564,7 +1543,6 @@
       }
     }
 
-    // Логика быстрых ссылок (вкладка)
     function addPageLinkItem() {
       const nameInput = document.getElementById('newPageLinkName');
       const urlInput = document.getElementById('newPageLinkUrl');
@@ -1594,7 +1572,6 @@
       saveAndRender();
     }
 
-    // Логика календаря
     function changeCalendarMonth(direction) {
       calDate.setMonth(calDate.getMonth() + direction);
       renderCalendar();
@@ -1617,15 +1594,15 @@
       titleEl.innerText = `${monthNames[month]} ${year}`;
 
       const firstDayOfMonth = new Date(year, month, 1);
-      let startingDay = firstDayOfMonth.getDay(); // 0 - ВС, 1 - ПН...
-      startingDay = (startingDay === 0) ? 6 : startingDay - 1; // Делаем ПН первым днем (0-6)
+      let startingDay = firstDayOfMonth.getDay(); 
+      startingDay = (startingDay === 0) ? 6 : startingDay - 1; 
 
       const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
       const prevMonthDays = new Date(year, month, 0).getDate();
 
       let daysArray = [];
 
-      // Дни предыдущего месяца
+      // Дни предыдущего месяца (выключаем для них клики, чтобы смены ставились строго в текущем месяце)
       for (let i = startingDay - 1; i >= 0; i--) {
         const dNum = prevMonthDays - i;
         const prevMonth = month === 0 ? 11 : month - 1;
@@ -1646,7 +1623,7 @@
         });
       }
 
-      // Дни следующего месяца до заполнения сетки (кратна 7)
+      // Дни следующего месяца
       let nextMonthDay = 1;
       while (daysArray.length % 7 !== 0) {
         const nextMonth = month === 11 ? 0 : month + 1;
@@ -1674,7 +1651,10 @@
           ${badgeHtml}
         `;
 
-        cell.onclick = () => openCalendarDayModal(item.dateStr, item.day, monthNames[month], year);
+        // Открываем модальное окно только для дней текущего месяца
+        if (item.isCurrentMonth) {
+          cell.onclick = () => openCalendarDayModal(item.dateStr, item.day, monthNames[month], year);
+        }
         gridEl.appendChild(cell);
       });
     }
@@ -1687,9 +1667,8 @@
       document.getElementById('calDayNoteInput').value = existing.text || '';
       selectedCalColorHex = existing.color || '#5865f2';
 
-      // Подсветка выбранной точки цвета
       document.querySelectorAll('.color-dot').forEach(dot => {
-        if (dot.style.backgroundColor === hexToRgb(selectedCalColorHex) || dot.style.backgroundColor === selectedCalColorHex) {
+        if (dot.style.backgroundColor === selectedCalColorHex) {
           dot.classList.add('selected');
         } else {
           dot.classList.remove('selected');
@@ -1734,12 +1713,6 @@
       closeCalendarDayModal();
     }
 
-    function hexToRgb(hex) {
-      // Конвертер для проверки совпадений цветов
-      return hex;
-    }
-
-    // Добавление виджетов
     function addWidget(type) {
       let defaultData;
       let defaultTitle;
@@ -1969,7 +1942,6 @@
       }
     }
 
-    // Drag & Drop для карточек виджетов
     let draggedId = null;
 
     function setupDragAndDropForCard(cardElement, id) {
@@ -2002,70 +1974,6 @@
           reorderWidgets(draggedId, id);
         }
       });
-
-      let touchTimeout = null;
-      let startX = 0, startY = 0;
-      let isTouchActive = false;
-
-      cardElement.addEventListener('touchstart', (e) => {
-        if (e.target.closest('input, textarea, button, [contenteditable="true"], a')) return;
-        const touch = e.touches[0];
-        startX = touch.clientX;
-        startY = touch.clientY;
-        isTouchActive = false;
-
-        touchTimeout = setTimeout(() => {
-          isTouchActive = true;
-          draggedId = id;
-          cardElement.classList.add('dragging');
-        }, 80);
-      }, { passive: true });
-
-      cardElement.addEventListener('touchmove', (e) => {
-        if (!touchTimeout) return;
-        const touch = e.touches[0];
-        const moveX = Math.abs(touch.clientX - startX);
-        const moveY = Math.abs(touch.clientY - startY);
-
-        if (moveY > 15 && moveY > moveX && !isTouchActive) {
-          clearTimeout(touchTimeout);
-          touchTimeout = null;
-          return;
-        }
-
-        if (isTouchActive) {
-          e.preventDefault();
-          const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
-          const targetCard = elementUnder ? elementUnder.closest('.card') : null;
-          document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
-          if (targetCard && targetCard !== cardElement) {
-            targetCard.classList.add('drag-over');
-          }
-        }
-      }, { passive: false });
-
-      cardElement.addEventListener('touchend', (e) => {
-        if (touchTimeout) {
-          clearTimeout(touchTimeout);
-          touchTimeout = null;
-        }
-        if (!isTouchActive) return;
-        isTouchActive = false;
-        cardElement.classList.remove('dragging');
-
-        const touch = e.changedTouches[0];
-        const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
-        const targetCard = elementUnder ? elementUnder.closest('.card') : null;
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
-
-        if (targetCard) {
-          const targetId = parseInt(targetCard.getAttribute('data-id'));
-          if (targetId && targetId !== draggedId) {
-            reorderWidgets(draggedId, targetId);
-          }
-        }
-        draggedId = null;
-      });
     }
 
     function reorderWidgets(fromId, toId) {
@@ -2090,7 +1998,6 @@
       paginationContainer.innerHTML = '';
       linksPageGrid.innerHTML = '';
 
-      // Рендер быстрых ссылок на отдельной вкладке
       quickLinks.forEach((link, idx) => {
         let domain = '';
         try { domain = new URL(link.url).hostname; } catch(e) { domain = 'google.com'; }
@@ -2197,95 +2104,71 @@
                 <label style="font-size: 0.75rem; color: var(--text-muted);">Название счетчика:</label>
                 <input type="text" id="counter-name-${w.id}" class="widget-input" value="${w.title}">
                 
-                <label style="font-size: 0.75rem; color: var(--text-muted);">Дата и время начала:</label>
+                <label style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Дата и время старта:</label>
                 <input type="datetime-local" id="counter-date-${w.id}" class="widget-input" value="${defaultDateTime}">
-                
-                <button class="primary" style="margin-top: 4px;" onclick="saveCounterConfig(${w.id})">Начать</button>
               </div>
+              <button class="primary" onclick="saveCounterConfig(${w.id})" style="width: 100%;">Запустить счетчик</button>
             `;
           } else {
-            const startDateObj = new Date(w.data.startTime);
-            const formattedStartDate = startDateObj.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + startDateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-
             bodyHTML = `
-              <div>
-                <div class="counter-timer-grid" id="timer-grid-${w.id}">
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-days-${w.id}">0</div>
-                    <div class="timer-label">дней</div>
-                  </div>
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-hours-${w.id}">00</div>
-                    <div class="timer-label">часов</div>
-                  </div>
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-mins-${w.id}">00</div>
-                    <div class="timer-label">минут</div>
-                  </div>
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-secs-${w.id}">00</div>
-                    <div class="timer-label">секунд</div>
-                  </div>
-                </div>
-                <div class="counter-start-info">Начало: ${formattedStartDate}</div>
+              <div class="counter-timer-grid" id="timer-grid-${w.id}">
+                <div class="timer-box"><div class="timer-num" id="t-days-${w.id}">0</div><div class="timer-label">дней</div></div>
+                <div class="timer-box"><div class="timer-num" id="t-hours-${w.id}">00</div><div class="timer-label">часов</div></div>
+                <div class="timer-box"><div class="timer-num" id="t-mins-${w.id}">00</div><div class="timer-label">минут</div></div>
+                <div class="timer-box"><div class="timer-num" id="t-secs-${w.id}">00</div><div class="timer-label">секунд</div></div>
               </div>
+              <div class="counter-start-info">Счетчик активен</div>
             `;
           }
-        } 
-        else if (w.type === 'savings') {
+        } else if (w.type === 'savings') {
           const current = w.data.current || 0;
-          const target = w.data.target || 1;
-          const percent = Math.min(100, Math.round((current / target) * 100));
-          
+          const target = w.data.target || 100000;
+          const percent = Math.min(Math.round((current / target) * 100), 100);
+
           bodyHTML = `
-            <div>
+            <div style="margin: 6px 0;">
               <div class="savings-row">
                 <span>Накоплено:</span>
-                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${current}" onchange="updateSavingsCurrent(${w.id}, this.value)">
+                <input type="number" value="${current}" onchange="updateSavingsCurrent(${w.id}, this.value)" style="width: 90px; background: var(--bg-color); border: 1px solid var(--border-color); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 0.85rem; text-align: right;">
               </div>
               <div class="savings-row">
                 <span>Цель:</span>
-                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${target}" onchange="updateSavingsTarget(${w.id}, this.value)">
+                <span style="color: #fff; font-weight: 600;">${target.toLocaleString()} ₽</span>
               </div>
               <div class="progress-bar">
                 <div class="progress-fill" style="width: ${percent}%;"></div>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Прогресс: ${percent}%</span>
-                <button class="primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openSavingsModal(${w.id})">+ Пополнить</button>
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                <span>Прогресс: ${percent}%</span>
+                <span>Осталось: ${Math.max(target - current, 0).toLocaleString()} ₽</span>
               </div>
             </div>
+            <button class="primary" onclick="openSavingsModal(${w.id})" style="width: 100%; margin-top: 4px;">Пополнить цель</button>
           `;
-        } 
-        else if (w.type === 'tasks') {
-          const itemsHTML = w.data.map((task, idx) => `
-            <div class="task-item ${task.done ? 'done' : ''}">
-              <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${w.id}, ${idx})">
-              <input type="text" class="widget-input" value="${task.text}" onchange="updateTaskText(${w.id}, ${idx}, this.value)">
-              <button class="btn-delete" onclick="removeTask(${w.id}, ${idx})">&times;</button>
-            </div>
-          `).join('');
+        } else if (w.type === 'tasks') {
+          const list = w.data || [];
+          let tasksHtml = '';
+          list.forEach((t, tIdx) => {
+            tasksHtml += `
+              <div class="task-item ${t.done ? 'done' : ''}">
+                <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskCheck(${w.id}, ${tIdx})">
+                <input type="text" class="widget-input" value="${t.text}" oninput="updateTaskText(${w.id}, ${tIdx}, this.value)" placeholder="Текст задачи">
+                <button class="btn-delete" style="font-size: 1rem; padding: 2px 6px;" onclick="removeTaskItem(${w.id}, ${tIdx})">&times;</button>
+              </div>
+            `;
+          });
 
           bodyHTML = `
-            <div class="task-list">${itemsHTML}</div>
-            <button onclick="addTask(${w.id})" style="width: 100%;">+ Добавить задачу</button>
+            <div class="task-list">${tasksHtml}</div>
+            <button class="primary" onclick="addTaskItem(${w.id})" style="width: 100%;">+ Добавить задачу</button>
           `;
         }
 
-        const showTitleHeader = (w.type !== 'counter' || (w.data && w.data.configured));
-
         card.innerHTML = `
-          ${showTitleHeader ? `
-            <div class="card-header">
-              <span class="card-title" contenteditable="true" onblur="updateTitle(${w.id}, this.innerText)">${w.title}</span>
-              <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
-            </div>
-          ` : `
-            <div class="card-header">
-              <span class="card-title">Настройка счетчика</span>
-              <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
-            </div>
-          `}
+          <div class="card-header">
+            <div class="card-title" contenteditable="true" onblur="updateWidgetTitle(${w.id}, this.innerText)">${w.title}</div>
+            <button class="btn-delete" onclick="promptDelete(${w.id})" title="Удалить виджет">&times;</button>
+          </div>
           ${bodyHTML}
         `;
 
@@ -2294,50 +2177,42 @@
       });
     }
 
-    function updateTitle(id, newTitle) {
+    function updateWidgetTitle(id, newTitle) {
       const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.title = newTitle;
+      if (widget && newTitle.trim()) {
+        widget.title = newTitle.trim();
         saveAndRender();
       }
     }
 
-    function updateSavingsTarget(id, val) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data.target = parseFloat(val) || 1;
+    function toggleTaskCheck(widgetId, taskIdx) {
+      const widget = widgets.find(w => w.id === widgetId);
+      if (widget && widget.data[taskIdx]) {
+        widget.data[taskIdx].done = !widget.data[taskIdx].done;
         saveAndRender();
       }
     }
 
-    function addTask(id) {
-      const widget = widgets.find(w => w.id === id);
+    function updateTaskText(widgetId, taskIdx, text) {
+      const widget = widgets.find(w => w.id === widgetId);
+      if (widget && widget.data[taskIdx]) {
+        widget.data[taskIdx].text = text;
+        // без сохранения при каждом вводе, чтобы не дергать фокус
+      }
+    }
+
+    function addTaskItem(widgetId) {
+      const widget = widgets.find(w => w.id === widgetId);
       if (widget) {
-        widget.data.push({ text: 'Новая задача', done: false });
+        widget.data.push({ text: '', done: false });
         saveAndRender();
       }
     }
 
-    function toggleTask(id, idx) {
-      const widget = widgets.find(w => w.id === id);
+    function removeTaskItem(widgetId, taskIdx) {
+      const widget = widgets.find(w => w.id === widgetId);
       if (widget) {
-        widget.data[idx].done = !widget.data[idx].done;
-        saveAndRender();
-      }
-    }
-
-    function updateTaskText(id, idx, val) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data[idx].text = val;
-        saveAndRender();
-      }
-    }
-
-    function removeTask(id, idx) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data.splice(idx, 1);
+        widget.data.splice(taskIdx, 1);
         saveAndRender();
       }
     }
