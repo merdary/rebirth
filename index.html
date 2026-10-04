@@ -954,6 +954,11 @@
       position: relative;
     }
 
+    /* Выделение сегодняшнего дня с учетом локального часового пояса */
+    .cal-day-cell.today {
+      border: 2px solid var(--accent-color);
+    }
+
     .cal-day-cell:hover {
       border-color: var(--text-muted);
       background-color: var(--card-hover);
@@ -1216,8 +1221,8 @@
         <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 10px;">
           <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Добавить новый сайт:</div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <input type="text" id="newPageLinkName" class="widget-input" placeholder="Название (например, GitHub)" style="flex: 1; min-width: 140px;">
-            <input type="text" id="newPageLinkUrl" class="widget-input" placeholder="URL (например, github.com)" style="flex: 2; min-width: 180px;">
+            <input type="text" id="newPageLinkName" class="widget-input" placeholder="Название" style="flex: 1; min-width: 140px;">
+            <input type="text" id="newPageLinkUrl" class="widget-input" placeholder="URL" style="flex: 2; min-width: 180px;">
             <button class="primary" onclick="addPageLinkItem()">Добавить ссылку</button>
           </div>
         </div>
@@ -1616,6 +1621,13 @@
       const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
       titleEl.innerText = `${monthNames[month]} ${year}`;
 
+      // Получаем сегодняшнюю дату с учетом локального часового пояса устройства
+      const nowLocal = new Date();
+      const todayYear = nowLocal.getFullYear();
+      const todayMonth = nowLocal.getMonth();
+      const todayDate = nowLocal.getDate();
+      const todayStr = `${todayYear}-${String(todayMonth + 1).padStart(2, '0')}-${String(todayDate).padStart(2, '0')}`;
+
       const firstDayOfMonth = new Date(year, month, 1);
       let startingDay = firstDayOfMonth.getDay(); // 0 - ВС, 1 - ПН...
       startingDay = (startingDay === 0) ? 6 : startingDay - 1; // Делаем ПН первым днем (0-6)
@@ -1661,7 +1673,10 @@
 
       daysArray.forEach(item => {
         const cell = document.createElement('div');
-        cell.className = `cal-day-cell ${!item.isCurrentMonth ? 'other-month' : ''}`;
+        
+        // Проверяем, является ли день сегодняшним по местному времени
+        const isToday = (item.dateStr === todayStr);
+        cell.className = `cal-day-cell ${!item.isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`;
         
         const shiftData = calendarShifts[item.dateStr];
         let badgeHtml = '';
@@ -1735,7 +1750,6 @@
     }
 
     function hexToRgb(hex) {
-      // Конвертер для проверки совпадений цветов
       return hex;
     }
 
