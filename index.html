@@ -848,8 +848,28 @@
       gap: 8px;
       text-decoration: none;
       color: var(--text-main);
-      transition: background-color 0.2s, border-color 0.2s;
+      transition: background-color 0.2s, border-color 0.2s, transform 0.2s, opacity 0.2s;
       position: relative;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y;
+    }
+
+    .link-page-tile:active {
+      cursor: grabbing;
+    }
+
+    .link-page-tile.dragging {
+      opacity: 0.4;
+      transform: scale(0.95);
+      border-color: var(--text-muted);
+    }
+
+    .link-page-tile.drag-over {
+      border-color: var(--text-muted);
+      background-color: var(--card-hover);
+      transform: translateY(-2px);
     }
 
     .link-page-tile:hover {
@@ -862,6 +882,7 @@
       height: 32px;
       object-fit: contain;
       border-radius: 6px;
+      pointer-events: none;
     }
 
     .link-page-tile span {
@@ -871,6 +892,7 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       width: 100%;
+      pointer-events: none;
     }
 
     .link-page-delete-btn {
@@ -884,6 +906,7 @@
       cursor: pointer;
       padding: 2px 6px;
       display: none;
+      z-index: 2;
     }
 
     .link-page-tile:hover .link-page-delete-btn {
@@ -1588,6 +1611,111 @@
       saveAndRender();
     }
 
+    let draggedLinkIndex = null;
+
+    function setupDragAndDropForLink(tile, index) {
+      tile.addEventListener('dragstart', (e) => {
+        draggedLinkIndex = index;
+        setTimeout(() => tile.classList.add('dragging'), 0);
+      });
+
+      tile.addEventListener('dragend', () => {
+        tile.classList.remove('dragging');
+        draggedLinkIndex = null;
+        document.querySelectorAll('.link-page-tile').forEach(t => t.classList.remove('drag-over'));
+      });
+
+      tile.addEventListener('dragover', (e) => e.preventDefault());
+
+      tile.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        if (index !== draggedLinkIndex) {
+          tile.classList.add('drag-over');
+        }
+      });
+
+      tile.addEventListener('dragleave', () => tile.classList.remove('drag-over'));
+
+      tile.addEventListener('drop', (e) => {
+        e.preventDefault();
+        tile.classList.remove('drag-over');
+        if (draggedLinkIndex !== null && draggedLinkIndex !== index) {
+          reorderLinks(draggedLinkIndex, index);
+        }
+      });
+
+      // Поддержка сенсорных экранов (смартфонов)
+      let touchTimeout = null;
+      let startX = 0, startY = 0;
+      let isTouchActive = false;
+
+      tile.addEventListener('touchstart', (e) => {
+        if (e.target.closest('button')) return;
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isTouchActive = false;
+
+        touchTimeout = setTimeout(() => {
+          isTouchActive = true;
+          draggedLinkIndex = index;
+          tile.classList.add('dragging');
+        }, 80);
+      }, { passive: true });
+
+      tile.addEventListener('touchmove', (e) => {
+        if (!touchTimeout) return;
+        const touch = e.touches[0];
+        const moveX = Math.abs(touch.clientX - startX);
+        const moveY = Math.abs(touch.clientY - startY);
+
+        if (moveY > 15 && moveY > moveX && !isTouchActive) {
+          clearTimeout(touchTimeout);
+          touchTimeout = null;
+          return;
+        }
+
+        if (isTouchActive) {
+          e.preventDefault();
+          const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetTile = elementUnder ? elementUnder.closest('.link-page-tile') : null;
+          document.querySelectorAll('.link-page-tile').forEach(t => t.classList.remove('drag-over'));
+          if (targetTile && targetTile !== tile) {
+            targetTile.classList.add('drag-over');
+          }
+        }
+      }, { passive: false });
+
+      tile.addEventListener('touchend', (e) => {
+        if (touchTimeout) {
+          clearTimeout(touchTimeout);
+          touchTimeout = null;
+        }
+        if (!isTouchActive) return;
+        isTouchActive = false;
+        tile.classList.remove('dragging');
+
+        const touch = e.changedTouches[0];
+        const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+        const targetTile = elementUnder ? elementUnder.closest('.link-page-tile') : null;
+        document.querySelectorAll('.link-page-tile').forEach(t => t.classList.remove('drag-over'));
+
+        if (targetTile) {
+          const targetIndex = parseInt(targetTile.getAttribute('data-index'));
+          if (!isNaN(targetIndex) && targetIndex !== draggedLinkIndex) {
+            reorderLinks(draggedLinkIndex, targetIndex);
+          }
+        }
+        draggedLinkIndex = null;
+      });
+    }
+
+    function reorderLinks(fromIdx, toIdx) {
+      const [moved] = quickLinks.splice(fromIdx, 1);
+      quickLinks.splice(toIdx, 0, moved);
+      saveAndRender();
+    }
+
     function changeCalendarMonth(direction) {
       calDate.setMonth(calDate.getMonth() + direction);
       renderCalendar();
@@ -2088,15 +2216,23 @@
         try { domain = new URL(link.url).hostname; } catch(e) { domain = 'google.com'; }
         const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 
-        const tile = document.createElement('a');
-        tile.href = link.url;
-        tile.target = '_blank';
+        const tile = document.createElement('div');
         tile.className = 'link-page-tile';
+        tile.setAttribute('draggable', 'true');
+        tile.setAttribute('data-index', idx);
+
         tile.innerHTML = `
           <img src="${faviconUrl}" alt="" onerror="this.src='icon.png'">
           <span>${link.name}</span>
-          <button class="link-page-delete-btn" onclick="event.preventDefault(); event.stopPropagation(); removePageLinkItem(${idx})">&times;</button>
+          <button class="link-page-delete-btn" onclick="removePageLinkItem(${idx})">&times;</button>
         `;
+
+        tile.onclick = (e) => {
+          if (e.target.closest('button')) return;
+          window.open(link.url, '_blank');
+        };
+
+        setupDragAndDropForLink(tile, idx);
         linksPageGrid.appendChild(tile);
       });
 
