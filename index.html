@@ -313,7 +313,7 @@
 
     .widget-controls button {
       flex: 1;
-      min-width: 100px;
+      min-width: 90px;
     }
 
     @media (min-width: 600px) {
@@ -773,6 +773,78 @@
       color: var(--text-muted);
     }
 
+    /* Стили для виджета Быстрые ссылки */
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .link-tile {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: background-color 0.2s, border-color 0.2s;
+      position: relative;
+    }
+
+    .link-tile:hover {
+      background-color: var(--card-hover);
+      border-color: var(--text-muted);
+    }
+
+    .link-tile img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .link-tile span {
+      font-size: 0.75rem;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .link-delete-btn {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 2px 4px;
+      line-height: 1;
+      display: none;
+    }
+
+    .link-tile:hover .link-delete-btn {
+      display: block;
+    }
+
+    .link-delete-btn:hover {
+      color: var(--danger-color);
+    }
+
+    .link-form-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -928,6 +1000,7 @@
           <button class="primary" onclick="addWidget('counter')">+ Счетчик</button>
           <button class="primary" onclick="addWidget('savings')">+ Цель</button>
           <button class="primary" onclick="addWidget('tasks')">+ Задачи</button>
+          <button class="primary" onclick="addWidget('links')">+ Ссылки</button>
         </div>
 
         <div class="main-grid" id="mainDashboard"></div>
@@ -1171,6 +1244,12 @@
       } else if (type === 'tasks') {
         defaultTitle = 'Мои задачи';
         defaultData = [{ text: 'Первая задача', done: false }];
+      } else if (type === 'links') {
+        defaultTitle = 'Быстрые ссылки';
+        defaultData = [
+          { name: 'GitHub', url: 'https://github.com' },
+          { name: 'YouTube', url: 'https://youtube.com' }
+        ];
       }
 
       const newWidget = {
@@ -1332,6 +1411,42 @@
       }
     }
 
+    // Функции для управления быстрыми ссылками
+    function addLinkItem(id) {
+      const nameInput = document.getElementById('link-name-' + id);
+      const urlInput = document.getElementById('link-url-' + id);
+      
+      let name = nameInput.value.trim();
+      let url = urlInput.value.trim();
+
+      if (!url) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      if (!name) {
+        try {
+          name = new URL(url).hostname.replace('www.', '');
+        } catch(e) {
+          name = 'Сайт';
+        }
+      }
+
+      const widget = widgets.find(w => w.id === id);
+      if (widget) {
+        if (!Array.isArray(widget.data)) widget.data = [];
+        widget.data.push({ name, url });
+        saveAndRender();
+      }
+    }
+
+    function removeLinkItem(id, idx) {
+      const widget = widgets.find(w => w.id === id);
+      if (widget && Array.isArray(widget.data)) {
+        widget.data.splice(idx, 1);
+        saveAndRender();
+      }
+    }
+
     function toggleUserProfileMenu(e) {
       e.stopPropagation();
       closeAllMenus();
@@ -1441,7 +1556,7 @@
       let isTouchActive = false;
 
       cardElement.addEventListener('touchstart', (e) => {
-        if (e.target.closest('input, textarea, button, [contenteditable="true"]')) {
+        if (e.target.closest('input, textarea, button, [contenteditable="true"], a')) {
           return;
         }
 
@@ -1691,6 +1806,40 @@
           bodyHTML = `
             <div class="task-list">${itemsHTML}</div>
             <button onclick="addTask(${w.id})" style="width: 100%;">+ Добавить задачу</button>
+          `;
+        }
+        else if (w.type === 'links') {
+          const linksList = Array.isArray(w.data) ? w.data : [];
+          const linksHTML = linksList.map((link, idx) => {
+            let domain = '';
+            try {
+              domain = new URL(link.url).hostname;
+            } catch(e) {
+              domain = 'google.com';
+            }
+            const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+            
+            return `
+              <a href="${link.url}" target="_blank" class="link-tile">
+                <img src="${faviconUrl}" alt="" onerror="this.src='icon.png'">
+                <span>${link.name}</span>
+                <button class="link-delete-btn" onclick="event.preventDefault(); event.stopPropagation(); removeLinkItem(${w.id}, ${idx})">&times;</button>
+              </a>
+            `;
+          }).join('');
+
+          bodyHTML = `
+            <div>
+              <div class="links-grid">${linksHTML}</div>
+              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 8px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Добавить ссылку:</div>
+                <div style="display: flex; gap: 6px;">
+                  <input type="text" id="link-name-${w.id}" class="widget-input" placeholder="Название" style="flex: 1; padding: 8px; font-size: 0.85rem;">
+                  <input type="text" id="link-url-${w.id}" class="widget-input" placeholder="URL (например, vk.com)" style="flex: 1.5; padding: 8px; font-size: 0.85rem;">
+                </div>
+                <button class="primary" style="padding: 8px; font-size: 0.8rem;" onclick="addLinkItem(${w.id})">Добавить</button>
+              </div>
+            </div>
           `;
         }
 
