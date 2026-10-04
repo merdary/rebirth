@@ -199,6 +199,20 @@
       gap: 8px;
     }
 
+    .weather-widget {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+    }
+
     .sync-status {
       font-size: 0.7rem;
       padding: 4px 8px;
@@ -905,6 +919,9 @@
         <div class="subtitle">Личная система трекинга</div>
       </div>
       <div class="header-right">
+        <!-- Блок погоды слева от синхронизации -->
+        <div class="weather-widget" id="weatherDisplay">🌤️ --°C</div>
+        
         <div class="sync-status" id="syncStatus">● Синхр.</div>
         
         <div class="user-profile-menu-container">
@@ -990,6 +1007,7 @@
         document.getElementById('dashboardScreen').style.display = 'block';
         await loadUserData();
         startGlobalTimer();
+        fetchWeather();
       } else {
         currentUser = null;
         widgets = [];
@@ -998,6 +1016,40 @@
         document.getElementById('dashboardScreen').style.display = 'none';
       }
     });
+
+    // Функция загрузки погоды
+    async function fetchWeather() {
+      const weatherEl = document.getElementById('weatherDisplay');
+      
+      const updateWithCoords = async (lat, lon) => {
+        try {
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`);
+          const data = await res.json();
+          if (data && data.current) {
+            const temp = Math.round(data.current.temperature_2m);
+            weatherEl.innerText = `🌤️ ${temp > 0 ? '+' : ''}${temp}°C`;
+          }
+        } catch (e) {
+          console.error("Weather fetch error:", e);
+          weatherEl.innerText = '🌤️ --°C';
+        }
+      };
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            updateWithCoords(pos.coords.latitude, pos.coords.longitude);
+          },
+          () => {
+            // Координаты по умолчанию (например, Москва) если пользователь отклонил геолокацию
+            updateWithCoords(55.75, 37.61);
+          },
+          { timeout: 5000 }
+        );
+      } else {
+        updateWithCoords(55.75, 37.61);
+      }
+    }
 
     function setAuthTab(mode) {
       const tabs = document.querySelectorAll('.auth-tab-btn');
@@ -1288,7 +1340,6 @@
       }
     });
 
-    // Управление пополнением и ручным изменением цели
     function openSavingsModal(id) {
       activeSavingsWidgetId = id;
       document.getElementById('savingsAmountInput').value = '';
@@ -1321,7 +1372,6 @@
       closeSavingsModal();
     }
 
-    // Ручное обновление накопленной суммы прямо из инпута на карточке
     function updateSavingsCurrent(id, val) {
       const widget = widgets.find(w => w.id === id);
       if (widget) {
@@ -1395,7 +1445,6 @@
       }
     }
 
-    // --- ЛОГИКА ПЕРЕМЕЩЕНИЯ ВИДЖЕТОВ (ПК Drag & Drop + Мобильный Smart Touch) ---
     let draggedId = null;
 
     function setupDragAndDropForCard(cardElement, id) {
