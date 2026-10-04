@@ -954,7 +954,6 @@
       position: relative;
     }
 
-    /* Выделение сегодняшнего дня с учетом локального часового пояса */
     .cal-day-cell.today {
       border: 2px solid var(--accent-color);
     }
@@ -1075,7 +1074,7 @@
     <div class="modal-card">
       <div class="modal-text" style="font-weight: 600; color: #fff;">Пополнить / изменить накопления</div>
       <div class="modal-text" style="font-size: 0.85rem; color: var(--text-muted);">Введите сумму для пополнения (можно со знаком минус, например: -1000) ИЛИ выберите точное значение ниже.</div>
-      <input type="number" id="savingsAmountInput" class="widget-input" placeholder="Сумма (например, 5000)">
+      <input type="number" id="savingsAmountInput" class="widget-input" placeholder="Сумма">
       <div class="modal-buttons">
         <button onclick="closeSavingsModal()">Отмена</button>
         <button class="primary" onclick="confirmAddSavings()">Добавить</button>
@@ -1267,7 +1266,7 @@
     let currentUser = null;
     let widgets = [];
     let quickLinks = [];
-    let calendarShifts = {}; // формат "YYYY-MM-DD": { text: "Смена", color: "#5865f2" }
+    let calendarShifts = {};
     let tabOrder = ['widgets', 'links', 'calendar'];
     let activeTab = 'widgets';
 
@@ -1279,7 +1278,6 @@
     let pendingDeleteId = null;
     let activeSavingsWidgetId = null;
 
-    // Состояние календаря
     let calDate = new Date();
     let selectedCalDateStr = null;
     let selectedCalColorHex = '#5865f2';
@@ -1435,20 +1433,14 @@
         if (doc.exists) {
           const d = doc.data();
           widgets = d.list || [];
-          quickLinks = d.links || [
-            { name: 'GitHub', url: 'https://github.com' },
-            { name: 'YouTube', url: 'https://youtube.com' }
-          ];
+          quickLinks = d.links || [];
           calendarShifts = d.shifts || {};
           if (d.tabOrder && Array.isArray(d.tabOrder)) {
             tabOrder = d.tabOrder;
           }
         } else {
           widgets = [];
-          quickLinks = [
-            { name: 'GitHub', url: 'https://github.com' },
-            { name: 'YouTube', url: 'https://youtube.com' }
-          ];
+          quickLinks = [];
           calendarShifts = {};
           tabOrder = ['widgets', 'links', 'calendar'];
         }
@@ -1483,7 +1475,6 @@
       }
     }
 
-    // Управление вкладками
     function switchTab(tabId) {
       activeTab = tabId;
       document.querySelectorAll('.tab-content-pane').forEach(p => p.classList.remove('active'));
@@ -1523,7 +1514,6 @@
       });
     }
 
-    // Перетаскивание вкладок
     let draggedTabId = null;
 
     function setupTabDragAndDrop(btn, tabId) {
@@ -1569,7 +1559,6 @@
       }
     }
 
-    // Логика быстрых ссылок (вкладка)
     function addPageLinkItem() {
       const nameInput = document.getElementById('newPageLinkName');
       const urlInput = document.getElementById('newPageLinkUrl');
@@ -1599,7 +1588,6 @@
       saveAndRender();
     }
 
-    // Логика календаря
     function changeCalendarMonth(direction) {
       calDate.setMonth(calDate.getMonth() + direction);
       renderCalendar();
@@ -1621,7 +1609,6 @@
       const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
       titleEl.innerText = `${monthNames[month]} ${year}`;
 
-      // Получаем сегодняшнюю дату с учетом локального часового пояса устройства
       const nowLocal = new Date();
       const todayYear = nowLocal.getFullYear();
       const todayMonth = nowLocal.getMonth();
@@ -1629,15 +1616,14 @@
       const todayStr = `${todayYear}-${String(todayMonth + 1).padStart(2, '0')}-${String(todayDate).padStart(2, '0')}`;
 
       const firstDayOfMonth = new Date(year, month, 1);
-      let startingDay = firstDayOfMonth.getDay(); // 0 - ВС, 1 - ПН...
-      startingDay = (startingDay === 0) ? 6 : startingDay - 1; // Делаем ПН первым днем (0-6)
+      let startingDay = firstDayOfMonth.getDay();
+      startingDay = (startingDay === 0) ? 6 : startingDay - 1;
 
       const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
       const prevMonthDays = new Date(year, month, 0).getDate();
 
       let daysArray = [];
 
-      // Дни предыдущего месяца
       for (let i = startingDay - 1; i >= 0; i--) {
         const dNum = prevMonthDays - i;
         const prevMonth = month === 0 ? 11 : month - 1;
@@ -1649,7 +1635,6 @@
         });
       }
 
-      // Дни текущего месяца
       for (let i = 1; i <= totalDaysInMonth; i++) {
         daysArray.push({
           day: i,
@@ -1658,7 +1643,6 @@
         });
       }
 
-      // Дни следующего месяца до заполнения сетки (кратна 7)
       let nextMonthDay = 1;
       while (daysArray.length % 7 !== 0) {
         const nextMonth = month === 11 ? 0 : month + 1;
@@ -1673,8 +1657,6 @@
 
       daysArray.forEach(item => {
         const cell = document.createElement('div');
-        
-        // Проверяем, является ли день сегодняшним по местному времени
         const isToday = (item.dateStr === todayStr);
         cell.className = `cal-day-cell ${!item.isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`;
         
@@ -1702,7 +1684,6 @@
       document.getElementById('calDayNoteInput').value = existing.text || '';
       selectedCalColorHex = existing.color || '#5865f2';
 
-      // Подсветка выбранной точки цвета
       document.querySelectorAll('.color-dot').forEach(dot => {
         if (dot.style.backgroundColor === hexToRgb(selectedCalColorHex) || dot.style.backgroundColor === selectedCalColorHex) {
           dot.classList.add('selected');
@@ -1753,7 +1734,6 @@
       return hex;
     }
 
-    // Добавление виджетов
     function addWidget(type) {
       let defaultData;
       let defaultTitle;
@@ -1983,7 +1963,6 @@
       }
     }
 
-    // Drag & Drop для карточек виджетов
     let draggedId = null;
 
     function setupDragAndDropForCard(cardElement, id) {
@@ -2104,7 +2083,6 @@
       paginationContainer.innerHTML = '';
       linksPageGrid.innerHTML = '';
 
-      // Рендер быстрых ссылок на отдельной вкладке
       quickLinks.forEach((link, idx) => {
         let domain = '';
         try { domain = new URL(link.url).hostname; } catch(e) { domain = 'google.com'; }
