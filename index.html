@@ -266,6 +266,59 @@
       background-color: rgba(242, 63, 67, 0.1);
     }
 
+    /* Навигация по вкладкам (с поддержкой Drag & Drop) */
+    .tabs-nav-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tab-nav-btn {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: grab;
+      user-select: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-nav-btn:active {
+      cursor: grabbing;
+    }
+
+    .tab-nav-btn.active {
+      background-color: var(--card-hover);
+      color: #ffffff;
+      border-color: var(--text-muted);
+    }
+
+    .tab-nav-btn.dragging {
+      opacity: 0.4;
+    }
+
+    .tab-nav-btn.drag-over {
+      border-color: var(--text-main);
+      background-color: var(--card-hover);
+    }
+
+    .tab-content-pane {
+      display: none;
+    }
+
+    .tab-content-pane.active {
+      display: block;
+    }
+
     .page-layout {
       display: grid;
       grid-template-columns: 1fr;
@@ -335,6 +388,7 @@
       }
     }
 
+    /* Лента заметок */
     .twitter-column {
       display: flex;
       flex-direction: column;
@@ -552,7 +606,7 @@
       color: var(--danger-color) !important;
     }
 
-    /* Виджеты с поддержкой перемещения Drag and Drop */
+    /* Карточки виджетов (Drag and Drop) */
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -736,12 +790,6 @@
       color: var(--text-muted);
     }
 
-    .savings-values {
-      font-weight: 600;
-      color: #ffffff;
-      font-size: 0.95rem;
-    }
-
     .task-list {
       display: flex;
       flex-direction: column;
@@ -773,43 +821,51 @@
       color: var(--text-muted);
     }
 
-    /* Стили для виджета Быстрые ссылки */
-    .links-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      gap: 8px;
-      margin-bottom: 10px;
+    /* Стили вкладки «Быстрые ссылки» (полноразмерная) */
+    .links-page-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .link-tile {
+    .links-page-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .link-page-tile {
       background-color: var(--bg-color);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 10px 6px;
+      border-radius: 12px;
+      padding: 14px 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       text-decoration: none;
       color: var(--text-main);
       transition: background-color 0.2s, border-color 0.2s;
       position: relative;
     }
 
-    .link-tile:hover {
+    .link-page-tile:hover {
       background-color: var(--card-hover);
       border-color: var(--text-muted);
     }
 
-    .link-tile img {
-      width: 24px;
-      height: 24px;
+    .link-page-tile img {
+      width: 32px;
+      height: 32px;
       object-fit: contain;
-      border-radius: 4px;
+      border-radius: 6px;
     }
 
-    .link-tile span {
-      font-size: 0.75rem;
+    .link-page-tile span {
+      font-size: 0.8rem;
       text-align: center;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -817,34 +873,114 @@
       width: 100%;
     }
 
-    .link-delete-btn {
+    .link-page-delete-btn {
       position: absolute;
-      top: 2px;
-      right: 2px;
+      top: 4px;
+      right: 4px;
       background: none;
       border: none;
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 1rem;
       cursor: pointer;
-      padding: 2px 4px;
-      line-height: 1;
+      padding: 2px 6px;
       display: none;
     }
 
-    .link-tile:hover .link-delete-btn {
+    .link-page-tile:hover .link-page-delete-btn {
       display: block;
     }
 
-    .link-delete-btn:hover {
+    .link-page-delete-btn:hover {
       color: var(--danger-color);
     }
 
-    .link-form-row {
+    /* Стили вкладки «Календарь» (График смен) */
+    .calendar-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       display: flex;
-      gap: 6px;
-      margin-top: 6px;
+      flex-direction: column;
+      gap: 16px;
     }
 
+    .cal-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
+      text-transform: capitalize;
+    }
+
+    .cal-nav-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .cal-grid-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .cal-grid-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .cal-day-cell {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      min-height: 75px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: border-color 0.2s, background-color 0.2s;
+      position: relative;
+    }
+
+    .cal-day-cell:hover {
+      border-color: var(--text-muted);
+      background-color: var(--card-hover);
+    }
+
+    .cal-day-cell.other-month {
+      opacity: 0.35;
+    }
+
+    .cal-day-num {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .cal-day-badge {
+      font-size: 0.65rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* Модальные окна */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -891,6 +1027,29 @@
       flex: 1;
       padding: 12px;
     }
+
+    .color-picker-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .color-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s;
+    }
+
+    .color-dot:hover {
+      transform: scale(1.1);
+    }
+
+    .color-dot.selected {
+      border-color: #ffffff;
+    }
   </style>
 </head>
 <body>
@@ -919,7 +1078,27 @@
     </div>
   </div>
 
-  <!-- Модальное окно сброса/восстановления пароля -->
+  <!-- Модальное окно настройки дня в календаре -->
+  <div id="calendarDayModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-text" id="calModalDateTitle" style="font-weight: 600; color: #fff;">Настройка дня</div>
+      <input type="text" id="calDayNoteInput" class="widget-input" placeholder="Название (например: Смена, Отгул)">
+      <div style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Выберите цвет метки:</div>
+      <div class="color-picker-row">
+        <div class="color-dot selected" style="background-color: #5865f2;" onclick="selectCalColor('#5865f2', this)"></div>
+        <div class="color-dot" style="background-color: #23a55a;" onclick="selectCalColor('#23a55a', this)"></div>
+        <div class="color-dot" style="background-color: #f0b232;" onclick="selectCalColor('#f0b232', this)"></div>
+        <div class="color-dot" style="background-color: #f23f43;" onclick="selectCalColor('#f23f43', this)"></div>
+        <div class="color-dot" style="background-color: #9b59b6;" onclick="selectCalColor('#9b59b6', this)"></div>
+      </div>
+      <div class="modal-buttons">
+        <button class="danger" onclick="clearCalendarDay()">Очистить</button>
+        <button class="primary" onclick="saveCalendarDayData()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно восстановления пароля -->
   <div id="forgotModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-text" style="font-weight: 600; color: #fff;">Восстановление пароля</div>
@@ -991,44 +1170,78 @@
       </div>
     </header>
 
-    <div class="page-layout">
-      
-      <!-- Левая колонка -->
-      <div class="left-column">
-        <div class="widget-controls">
-          <span class="widget-controls-title">Добавить виджет:</span>
-          <button class="primary" onclick="addWidget('counter')">+ Счетчик</button>
-          <button class="primary" onclick="addWidget('savings')">+ Цель</button>
-          <button class="primary" onclick="addWidget('tasks')">+ Задачи</button>
-          <button class="primary" onclick="addWidget('links')">+ Ссылки</button>
-        </div>
-
-        <div class="main-grid" id="mainDashboard"></div>
-      </div>
-
-      <!-- Правая колонка: Лента заметок -->
-      <div class="twitter-column">
-        <div class="twitter-column-title">Лента заметок</div>
-        
-        <div class="twitter-card-container">
-          <div class="tweet-creator-label">Написать новую заметку</div>
-          
-          <div class="telegram-input-box">
-            <textarea id="newTweetText" class="widget-input" placeholder="Что нового?" rows="2" onkeydown="handleKeySend(event)"></textarea>
-            <button class="telegram-send-btn" onclick="postNewTweet()" title="Отправить">
-              <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-            </button>
-          </div>
-
-          <div class="twitter-divider" id="tweetsDivider" style="display: none;"></div>
-
-          <div id="twitterTweetsList" class="tweets-scroll-list"></div>
-          
-          <div id="paginationContainer" class="pagination-container" style="display: none;"></div>
-        </div>
-      </div>
-
+    <!-- Навигация по вкладкам (можно менять местами Drag & Drop) -->
+    <div class="tabs-nav-container" id="tabsNavContainer">
+      <button class="tab-nav-btn active" data-tab="widgets" draggable="true" onclick="switchTab('widgets')">📊 Виджеты</button>
+      <button class="tab-nav-btn" data-tab="links" draggable="true" onclick="switchTab('links')">🔗 Быстрые ссылки</button>
+      <button class="tab-nav-btn" data-tab="calendar" draggable="true" onclick="switchTab('calendar')">📅 Календарь смен</button>
     </div>
+
+    <!-- Вкладка 1: Виджеты -->
+    <div id="pane-widgets" class="tab-content-pane active">
+      <div class="page-layout">
+        <div class="left-column">
+          <div class="widget-controls">
+            <span class="widget-controls-title">Добавить виджет:</span>
+            <button class="primary" onclick="addWidget('counter')">+ Счетчик</button>
+            <button class="primary" onclick="addWidget('savings')">+ Цель</button>
+            <button class="primary" onclick="addWidget('tasks')">+ Задачи</button>
+          </div>
+          <div class="main-grid" id="mainDashboard"></div>
+        </div>
+
+        <div class="twitter-column">
+          <div class="twitter-column-title">Лента заметок</div>
+          <div class="twitter-card-container">
+            <div class="tweet-creator-label">Написать новую заметку</div>
+            <div class="telegram-input-box">
+              <textarea id="newTweetText" class="widget-input" placeholder="Что нового?" rows="2" onkeydown="handleKeySend(event)"></textarea>
+              <button class="telegram-send-btn" onclick="postNewTweet()" title="Отправить">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+              </button>
+            </div>
+            <div class="twitter-divider" id="tweetsDivider" style="display: none;"></div>
+            <div id="twitterTweetsList" class="tweets-scroll-list"></div>
+            <div id="paginationContainer" class="pagination-container" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Вкладка 2: Быстрые ссылки -->
+    <div id="pane-links" class="tab-content-pane">
+      <div class="links-page-card">
+        <div style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 14px;">Мои быстрые ссылки</div>
+        <div class="links-page-grid" id="linksPageGrid"></div>
+        <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 10px;">
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Добавить новый сайт:</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="text" id="newPageLinkName" class="widget-input" placeholder="Название (например, GitHub)" style="flex: 1; min-width: 140px;">
+            <input type="text" id="newPageLinkUrl" class="widget-input" placeholder="URL (например, github.com)" style="flex: 2; min-width: 180px;">
+            <button class="primary" onclick="addPageLinkItem()">Добавить ссылку</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Вкладка 3: Календарь -->
+    <div id="pane-calendar" class="tab-content-pane">
+      <div class="calendar-card">
+        <div class="cal-header-row">
+          <div class="cal-title" id="calMonthTitle">Месяц Год</div>
+          <div class="cal-nav-btns">
+            <button onclick="changeCalendarMonth(-1)">‹ Назад</button>
+            <button onclick="resetCalendarToCurrent()">Сегодня</button>
+            <button onclick="changeCalendarMonth(1)">Вперед ›</button>
+          </div>
+        </div>
+        <div class="cal-grid-weekdays">
+          <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+        </div>
+        <div class="cal-grid-days" id="calGridDays"></div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -1048,6 +1261,11 @@
 
     let currentUser = null;
     let widgets = [];
+    let quickLinks = [];
+    let calendarShifts = {}; // формат "YYYY-MM-DD": { text: "Смена", color: "#5865f2" }
+    let tabOrder = ['widgets', 'links', 'calendar'];
+    let activeTab = 'widgets';
+
     let currentTweetPage = 1;
     const tweetsPerPage = 5;
     const charLimit = 120;
@@ -1055,6 +1273,11 @@
     let timerInterval = null;
     let pendingDeleteId = null;
     let activeSavingsWidgetId = null;
+
+    // Состояние календаря
+    let calDate = new Date();
+    let selectedCalDateStr = null;
+    let selectedCalColorHex = '#5865f2';
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -1066,6 +1289,8 @@
       } else {
         currentUser = null;
         widgets = [];
+        quickLinks = [];
+        calendarShifts = {};
         if (timerInterval) clearInterval(timerInterval);
         document.getElementById('authScreen').style.display = 'flex';
         document.getElementById('dashboardScreen').style.display = 'none';
@@ -1133,7 +1358,10 @@
         });
 
         await db.collection('users').doc(user.uid).collection('data').doc('widgets').set({
-          list: []
+          list: [],
+          links: [{ name: 'GitHub', url: 'https://github.com' }, { name: 'YouTube', url: 'https://youtube.com' }],
+          shifts: {},
+          tabOrder: ['widgets', 'links', 'calendar']
         });
 
       } catch (error) {
@@ -1200,10 +1428,26 @@
 
         const doc = await db.collection('users').doc(currentUser.uid).collection('data').doc('widgets').get();
         if (doc.exists) {
-          widgets = doc.data().list || [];
+          const d = doc.data();
+          widgets = d.list || [];
+          quickLinks = d.links || [
+            { name: 'GitHub', url: 'https://github.com' },
+            { name: 'YouTube', url: 'https://youtube.com' }
+          ];
+          calendarShifts = d.shifts || {};
+          if (d.tabOrder && Array.isArray(d.tabOrder)) {
+            tabOrder = d.tabOrder;
+          }
         } else {
           widgets = [];
+          quickLinks = [
+            { name: 'GitHub', url: 'https://github.com' },
+            { name: 'YouTube', url: 'https://youtube.com' }
+          ];
+          calendarShifts = {};
+          tabOrder = ['widgets', 'links', 'calendar'];
         }
+        renderTabsNav();
         render();
       } catch (e) {
         console.error("Error loading user data:", e);
@@ -1220,7 +1464,10 @@
 
       try {
         await db.collection('users').doc(currentUser.uid).collection('data').doc('widgets').set({
-          list: widgets
+          list: widgets,
+          links: quickLinks,
+          shifts: calendarShifts,
+          tabOrder: tabOrder
         });
         syncStatus.innerText = '● Синхр.';
         syncStatus.style.color = 'var(--success-color)';
@@ -1231,6 +1478,268 @@
       }
     }
 
+    // Управление вкладками
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll('.tab-content-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
+
+      const pane = document.getElementById('pane-' + tabId);
+      if (pane) pane.classList.add('active');
+
+      const btn = document.querySelector(`.tab-nav-btn[data-tab="${tabId}"]`);
+      if (btn) btn.classList.add('active');
+
+      if (tabId === 'calendar') {
+        renderCalendar();
+      }
+    }
+
+    function renderTabsNav() {
+      const container = document.getElementById('tabsNavContainer');
+      container.innerHTML = '';
+
+      const tabTitles = {
+        widgets: '📊 Виджеты',
+        links: '🔗 Быстрые ссылки',
+        calendar: '📅 Календарь смен'
+      };
+
+      tabOrder.forEach(tabId => {
+        const btn = document.createElement('button');
+        btn.className = `tab-nav-btn ${tabId === activeTab ? 'active' : ''}`;
+        btn.setAttribute('data-tab', tabId);
+        btn.setAttribute('draggable', 'true');
+        btn.innerText = tabTitles[tabId] || tabId;
+        btn.onclick = () => switchTab(tabId);
+
+        setupTabDragAndDrop(btn, tabId);
+        container.appendChild(btn);
+      });
+    }
+
+    // Перетаскивание вкладок
+    let draggedTabId = null;
+
+    function setupTabDragAndDrop(btn, tabId) {
+      btn.addEventListener('dragstart', (e) => {
+        draggedTabId = tabId;
+        setTimeout(() => btn.classList.add('dragging'), 0);
+      });
+
+      btn.addEventListener('dragend', () => {
+        btn.classList.remove('dragging');
+        draggedTabId = null;
+        document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('drag-over'));
+      });
+
+      btn.addEventListener('dragover', (e) => e.preventDefault());
+
+      btn.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        if (tabId !== draggedTabId) {
+          btn.classList.add('drag-over');
+        }
+      });
+
+      btn.addEventListener('dragleave', () => btn.classList.remove('drag-over'));
+
+      btn.addEventListener('drop', (e) => {
+        e.preventDefault();
+        btn.classList.remove('drag-over');
+        if (draggedTabId !== null && draggedTabId !== tabId) {
+          reorderTabs(draggedTabId, tabId);
+        }
+      });
+    }
+
+    function reorderTabs(fromId, toId) {
+      const fromIdx = tabOrder.indexOf(fromId);
+      const toIdx = tabOrder.indexOf(toId);
+      if (fromIdx !== -1 && toIdx !== -1) {
+        const [moved] = tabOrder.splice(fromIdx, 1);
+        tabOrder.splice(toIdx, 0, moved);
+        renderTabsNav();
+        saveAndRender();
+      }
+    }
+
+    // Логика быстрых ссылок (вкладка)
+    function addPageLinkItem() {
+      const nameInput = document.getElementById('newPageLinkName');
+      const urlInput = document.getElementById('newPageLinkUrl');
+      let name = nameInput.value.trim();
+      let url = urlInput.value.trim();
+
+      if (!url) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      if (!name) {
+        try {
+          name = new URL(url).hostname.replace('www.', '');
+        } catch(e) {
+          name = 'Сайт';
+        }
+      }
+
+      quickLinks.push({ name, url });
+      nameInput.value = '';
+      urlInput.value = '';
+      saveAndRender();
+    }
+
+    function removePageLinkItem(idx) {
+      quickLinks.splice(idx, 1);
+      saveAndRender();
+    }
+
+    // Логика календаря
+    function changeCalendarMonth(direction) {
+      calDate.setMonth(calDate.getMonth() + direction);
+      renderCalendar();
+    }
+
+    function resetCalendarToCurrent() {
+      calDate = new Date();
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const titleEl = document.getElementById('calMonthTitle');
+      const gridEl = document.getElementById('calGridDays');
+      gridEl.innerHTML = '';
+
+      const year = calDate.getFullYear();
+      const month = calDate.getMonth();
+
+      const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+      titleEl.innerText = `${monthNames[month]} ${year}`;
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      let startingDay = firstDayOfMonth.getDay(); // 0 - ВС, 1 - ПН...
+      startingDay = (startingDay === 0) ? 6 : startingDay - 1; // Делаем ПН первым днем (0-6)
+
+      const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+      const prevMonthDays = new Date(year, month, 0).getDate();
+
+      let daysArray = [];
+
+      // Дни предыдущего месяца
+      for (let i = startingDay - 1; i >= 0; i--) {
+        const dNum = prevMonthDays - i;
+        const prevMonth = month === 0 ? 11 : month - 1;
+        const prevYear = month === 0 ? year - 1 : year;
+        daysArray.push({
+          day: dNum,
+          isCurrentMonth: false,
+          dateStr: `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`
+        });
+      }
+
+      // Дни текущего месяца
+      for (let i = 1; i <= totalDaysInMonth; i++) {
+        daysArray.push({
+          day: i,
+          isCurrentMonth: true,
+          dateStr: `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`
+        });
+      }
+
+      // Дни следующего месяца до заполнения сетки (кратна 7)
+      let nextMonthDay = 1;
+      while (daysArray.length % 7 !== 0) {
+        const nextMonth = month === 11 ? 0 : month + 1;
+        const nextYear = month === 11 ? year + 1 : year;
+        daysArray.push({
+          day: nextMonthDay,
+          isCurrentMonth: false,
+          dateStr: `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(nextMonthDay).padStart(2, '0')}`
+        });
+        nextMonthDay++;
+      }
+
+      daysArray.forEach(item => {
+        const cell = document.createElement('div');
+        cell.className = `cal-day-cell ${!item.isCurrentMonth ? 'other-month' : ''}`;
+        
+        const shiftData = calendarShifts[item.dateStr];
+        let badgeHtml = '';
+        if (shiftData && shiftData.text) {
+          badgeHtml = `<div class="cal-day-badge" style="background-color: ${shiftData.color || '#5865f2'}; color: #fff;">${shiftData.text}</div>`;
+        }
+
+        cell.innerHTML = `
+          <div class="cal-day-num">${item.day}</div>
+          ${badgeHtml}
+        `;
+
+        cell.onclick = () => openCalendarDayModal(item.dateStr, item.day, monthNames[month], year);
+        gridEl.appendChild(cell);
+      });
+    }
+
+    function openCalendarDayModal(dateStr, dayNum, monthName, year) {
+      selectedCalDateStr = dateStr;
+      document.getElementById('calModalDateTitle').innerText = `${dayNum} ${monthName} ${year}`;
+      
+      const existing = calendarShifts[dateStr] || { text: '', color: '#5865f2' };
+      document.getElementById('calDayNoteInput').value = existing.text || '';
+      selectedCalColorHex = existing.color || '#5865f2';
+
+      // Подсветка выбранной точки цвета
+      document.querySelectorAll('.color-dot').forEach(dot => {
+        if (dot.style.backgroundColor === hexToRgb(selectedCalColorHex) || dot.style.backgroundColor === selectedCalColorHex) {
+          dot.classList.add('selected');
+        } else {
+          dot.classList.remove('selected');
+        }
+      });
+
+      document.getElementById('calendarDayModal').classList.add('show');
+      setTimeout(() => document.getElementById('calDayNoteInput').focus(), 50);
+    }
+
+    function closeCalendarDayModal() {
+      selectedCalDateStr = null;
+      document.getElementById('calendarDayModal').classList.remove('show');
+    }
+
+    function selectCalColor(hex, el) {
+      selectedCalColorHex = hex;
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function saveCalendarDayData() {
+      const text = document.getElementById('calDayNoteInput').value.trim();
+      if (selectedCalDateStr) {
+        if (text) {
+          calendarShifts[selectedCalDateStr] = { text: text, color: selectedCalColorHex };
+        } else {
+          delete calendarShifts[selectedCalDateStr];
+        }
+        saveAndRender();
+        renderCalendar();
+      }
+      closeCalendarDayModal();
+    }
+
+    function clearCalendarDay() {
+      if (selectedCalDateStr && calendarShifts[selectedCalDateStr]) {
+        delete calendarShifts[selectedCalDateStr];
+        saveAndRender();
+        renderCalendar();
+      }
+      closeCalendarDayModal();
+    }
+
+    function hexToRgb(hex) {
+      // Конвертер для проверки совпадений цветов
+      return hex;
+    }
+
+    // Добавление виджетов
     function addWidget(type) {
       let defaultData;
       let defaultTitle;
@@ -1244,12 +1753,6 @@
       } else if (type === 'tasks') {
         defaultTitle = 'Мои задачи';
         defaultData = [{ text: 'Первая задача', done: false }];
-      } else if (type === 'links') {
-        defaultTitle = 'Быстрые ссылки';
-        defaultData = [
-          { name: 'GitHub', url: 'https://github.com' },
-          { name: 'YouTube', url: 'https://youtube.com' }
-        ];
       }
 
       const newWidget = {
@@ -1367,7 +1870,6 @@
       }
     });
 
-    // Управление пополнением и ручным изменением цели
     function openSavingsModal(id) {
       activeSavingsWidgetId = id;
       document.getElementById('savingsAmountInput').value = '';
@@ -1400,49 +1902,12 @@
       closeSavingsModal();
     }
 
-    // Ручное обновление накопленной суммы прямо из инпута на карточке
     function updateSavingsCurrent(id, val) {
       const widget = widgets.find(w => w.id === id);
       if (widget) {
         const parsed = parseFloat(val);
         widget.data.current = isNaN(parsed) ? 0 : parsed;
         if (widget.data.current < 0) widget.data.current = 0;
-        saveAndRender();
-      }
-    }
-
-    // Функции для управления быстрыми ссылками
-    function addLinkItem(id) {
-      const nameInput = document.getElementById('link-name-' + id);
-      const urlInput = document.getElementById('link-url-' + id);
-      
-      let name = nameInput.value.trim();
-      let url = urlInput.value.trim();
-
-      if (!url) return;
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-      }
-      if (!name) {
-        try {
-          name = new URL(url).hostname.replace('www.', '');
-        } catch(e) {
-          name = 'Сайт';
-        }
-      }
-
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        if (!Array.isArray(widget.data)) widget.data = [];
-        widget.data.push({ name, url });
-        saveAndRender();
-      }
-    }
-
-    function removeLinkItem(id, idx) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget && Array.isArray(widget.data)) {
-        widget.data.splice(idx, 1);
         saveAndRender();
       }
     }
@@ -1458,9 +1923,7 @@
       event.stopPropagation();
       closeAllMenus();
       const menu = document.getElementById('menu-' + id);
-      if (menu) {
-        menu.classList.toggle('show');
-      }
+      if (menu) menu.classList.toggle('show');
     }
 
     function closeAllMenus() {
@@ -1468,9 +1931,7 @@
       document.querySelectorAll('.tweet-dropdown-menu').forEach(m => m.classList.remove('show'));
     }
 
-    window.addEventListener('click', () => {
-      closeAllMenus();
-    });
+    window.addEventListener('click', () => closeAllMenus());
 
     function toggleReadMore(id) {
       expandedTweets[id] = !expandedTweets[id];
@@ -1480,7 +1941,6 @@
     function startEditTweet(id) {
       const itemNode = document.getElementById('tweet-item-' + id);
       if (!itemNode) return;
-
       const widget = widgets.find(w => w.id === id);
       if (!widget) return;
 
@@ -1501,7 +1961,6 @@
       const textarea = document.getElementById('edit-text-' + id);
       if (!textarea) return;
       const newText = textarea.value.trim();
-      
       const widget = widgets.find(w => w.id === id);
       if (widget) {
         widget.data.text = newText;
@@ -1510,7 +1969,7 @@
       }
     }
 
-    // --- ЛОГИКА ПЕРЕМЕЩЕНИЯ ВИДЖЕТОВ (ПК Drag & Drop + Мобильный Smart Touch) ---
+    // Drag & Drop для карточек виджетов
     let draggedId = null;
 
     function setupDragAndDropForCard(cardElement, id) {
@@ -1527,20 +1986,14 @@
         document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
       });
 
-      cardElement.addEventListener('dragover', (e) => {
-        e.preventDefault();
-      });
+      cardElement.addEventListener('dragover', (e) => e.preventDefault());
 
       cardElement.addEventListener('dragenter', (e) => {
         e.preventDefault();
-        if (id !== draggedId) {
-          cardElement.classList.add('drag-over');
-        }
+        if (id !== draggedId) cardElement.classList.add('drag-over');
       });
 
-      cardElement.addEventListener('dragleave', () => {
-        cardElement.classList.remove('drag-over');
-      });
+      cardElement.addEventListener('dragleave', () => cardElement.classList.remove('drag-over'));
 
       cardElement.addEventListener('drop', (e) => {
         e.preventDefault();
@@ -1551,15 +2004,11 @@
       });
 
       let touchTimeout = null;
-      let startX = 0;
-      let startY = 0;
+      let startX = 0, startY = 0;
       let isTouchActive = false;
 
       cardElement.addEventListener('touchstart', (e) => {
-        if (e.target.closest('input, textarea, button, [contenteditable="true"], a')) {
-          return;
-        }
-
+        if (e.target.closest('input, textarea, button, [contenteditable="true"], a')) return;
         const touch = e.touches[0];
         startX = touch.clientX;
         startY = touch.clientY;
@@ -1574,7 +2023,6 @@
 
       cardElement.addEventListener('touchmove', (e) => {
         if (!touchTimeout) return;
-        
         const touch = e.touches[0];
         const moveX = Math.abs(touch.clientX - startX);
         const moveY = Math.abs(touch.clientY - startY);
@@ -1589,7 +2037,6 @@
           e.preventDefault();
           const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
           const targetCard = elementUnder ? elementUnder.closest('.card') : null;
-
           document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
           if (targetCard && targetCard !== cardElement) {
             targetCard.classList.add('drag-over');
@@ -1602,7 +2049,6 @@
           clearTimeout(touchTimeout);
           touchTimeout = null;
         }
-
         if (!isTouchActive) return;
         isTouchActive = false;
         cardElement.classList.remove('dragging');
@@ -1610,7 +2056,6 @@
         const touch = e.changedTouches[0];
         const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
         const targetCard = elementUnder ? elementUnder.closest('.card') : null;
-
         document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
 
         if (targetCard) {
@@ -1626,7 +2071,6 @@
     function reorderWidgets(fromId, toId) {
       const fromIndex = widgets.findIndex(w => w.id === fromId);
       const toIndex = widgets.findIndex(w => w.id === toId);
-
       if (fromIndex !== -1 && toIndex !== -1) {
         const [movedItem] = widgets.splice(fromIndex, 1);
         widgets.splice(toIndex, 0, movedItem);
@@ -1639,10 +2083,30 @@
       const twitterTweetsList = document.getElementById('twitterTweetsList');
       const tweetsDivider = document.getElementById('tweetsDivider');
       const paginationContainer = document.getElementById('paginationContainer');
+      const linksPageGrid = document.getElementById('linksPageGrid');
 
       mainGrid.innerHTML = '';
       twitterTweetsList.innerHTML = '';
       paginationContainer.innerHTML = '';
+      linksPageGrid.innerHTML = '';
+
+      // Рендер быстрых ссылок на отдельной вкладке
+      quickLinks.forEach((link, idx) => {
+        let domain = '';
+        try { domain = new URL(link.url).hostname; } catch(e) { domain = 'google.com'; }
+        const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+
+        const tile = document.createElement('a');
+        tile.href = link.url;
+        tile.target = '_blank';
+        tile.className = 'link-page-tile';
+        tile.innerHTML = `
+          <img src="${faviconUrl}" alt="" onerror="this.src='icon.png'">
+          <span>${link.name}</span>
+          <button class="link-page-delete-btn" onclick="event.preventDefault(); event.stopPropagation(); removePageLinkItem(${idx})">&times;</button>
+        `;
+        linksPageGrid.appendChild(tile);
+      });
 
       const diaryWidgets = widgets.filter(w => w.type === 'diary');
       const otherWidgets = widgets.filter(w => w.type !== 'diary');
@@ -1678,7 +2142,6 @@
         }
 
         const editedLabelHtml = w.isEdited ? `<span class="tweet-edited-label">(изменено)</span>` : '';
-
         const tweetItem = document.createElement('div');
         tweetItem.className = 'tweet-item';
         tweetItem.id = 'tweet-item-' + w.id;
@@ -1806,40 +2269,6 @@
           bodyHTML = `
             <div class="task-list">${itemsHTML}</div>
             <button onclick="addTask(${w.id})" style="width: 100%;">+ Добавить задачу</button>
-          `;
-        }
-        else if (w.type === 'links') {
-          const linksList = Array.isArray(w.data) ? w.data : [];
-          const linksHTML = linksList.map((link, idx) => {
-            let domain = '';
-            try {
-              domain = new URL(link.url).hostname;
-            } catch(e) {
-              domain = 'google.com';
-            }
-            const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-            
-            return `
-              <a href="${link.url}" target="_blank" class="link-tile">
-                <img src="${faviconUrl}" alt="" onerror="this.src='icon.png'">
-                <span>${link.name}</span>
-                <button class="link-delete-btn" onclick="event.preventDefault(); event.stopPropagation(); removeLinkItem(${w.id}, ${idx})">&times;</button>
-              </a>
-            `;
-          }).join('');
-
-          bodyHTML = `
-            <div>
-              <div class="links-grid">${linksHTML}</div>
-              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 8px;">
-                <div style="font-size: 0.75rem; color: var(--text-muted);">Добавить ссылку:</div>
-                <div style="display: flex; gap: 6px;">
-                  <input type="text" id="link-name-${w.id}" class="widget-input" placeholder="Название" style="flex: 1; padding: 8px; font-size: 0.85rem;">
-                  <input type="text" id="link-url-${w.id}" class="widget-input" placeholder="URL (например, vk.com)" style="flex: 1.5; padding: 8px; font-size: 0.85rem;">
-                </div>
-                <button class="primary" style="padding: 8px; font-size: 0.8rem;" onclick="addLinkItem(${w.id})">Добавить</button>
-              </div>
-            </div>
           `;
         }
 
