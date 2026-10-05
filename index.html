@@ -64,7 +64,6 @@
       gap: 8px;
     }
 
-    /* Экран Загрузки (предотвращает моргание вкладок) */
     #loadingScreen {
       display: flex;
       flex-direction: column;
@@ -76,7 +75,6 @@
       gap: 12px;
     }
 
-    /* Экран Авторизации */
     #authScreen {
       display: none;
       justify-content: center;
@@ -180,7 +178,6 @@
       color: #ffffff;
     }
 
-    /* Главный экран */
     #dashboardScreen {
       display: none;
     }
@@ -278,7 +275,6 @@
       background-color: rgba(242, 63, 67, 0.1);
     }
 
-    /* Навигация по вкладкам (с поддержкой Drag & Drop) */
     .tabs-nav-container {
       display: flex;
       gap: 8px;
@@ -400,7 +396,6 @@
       }
     }
 
-    /* Лента заметок */
     .twitter-column {
       display: flex;
       flex-direction: column;
@@ -618,7 +613,6 @@
       color: var(--danger-color) !important;
     }
 
-    /* Карточки виджетов (Drag and Drop) */
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -833,7 +827,6 @@
       color: var(--text-muted);
     }
 
-    /* Стили вкладки «Быстрые ссылки» (полноразмерная) */
     .links-page-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -929,7 +922,6 @@
       color: var(--danger-color);
     }
 
-    /* Стили вкладки «Календарь» (График смен) */
     .calendar-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -1019,7 +1011,6 @@
       font-weight: 500;
     }
 
-    /* Стили вкладки «Галерея» */
     .gallery-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -1095,7 +1086,6 @@
       font-size: 0.75rem;
     }
 
-    /* Модальные окна */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -1169,7 +1159,6 @@
 </head>
 <body>
 
-  <!-- Модальное окно подтверждения удаления -->
   <div id="deleteModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-text">Внимание, после удаления восстановить будет невозможно</div>
@@ -1180,7 +1169,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно пополнения финансовой цели -->
   <div id="addSavingsModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-text" style="font-weight: 600; color: #fff;">Пополнить / изменить накопления</div>
@@ -1193,7 +1181,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно настройки дня в календаре -->
   <div id="calendarDayModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-text" id="calModalDateTitle" style="font-weight: 600; color: #fff;">Настройка дня</div>
@@ -1213,7 +1200,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно восстановления пароля -->
   <div id="forgotModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-text" style="font-weight: 600; color: #fff;">Восстановление пароля</div>
@@ -1227,12 +1213,10 @@
     </div>
   </div>
 
-  <!-- Экран Загрузки (предотвращает прыжки интерфейса) -->
   <div id="loadingScreen">
     <div>Загрузка...</div>
   </div>
 
-  <!-- Экран Входа / Регистрации -->
   <div id="authScreen">
     <div class="auth-card">
       <div class="auth-header">
@@ -1265,7 +1249,6 @@
     </div>
   </div>
 
-  <!-- Главный Экран -->
   <div id="dashboardScreen">
     <header>
       <div>
@@ -1290,7 +1273,6 @@
       </div>
     </header>
 
-    <!-- Навигация по вкладкам (можно менять местами Drag & Drop) -->
     <div class="tabs-nav-container" id="tabsNavContainer">
       <button class="tab-nav-btn active" data-tab="widgets" draggable="true" onclick="switchTab('widgets')">📊 Виджеты</button>
       <button class="tab-nav-btn" data-tab="links" draggable="true" onclick="switchTab('links')">🔗 Быстрые ссылки</button>
@@ -1298,7 +1280,6 @@
       <button class="tab-nav-btn" data-tab="gallery" draggable="true" onclick="switchTab('gallery')">🖼 Галерея</button>
     </div>
 
-    <!-- Вкладка 1: Виджеты -->
     <div id="pane-widgets" class="tab-content-pane active">
       <div class="page-layout">
         <div class="left-column">
@@ -1329,7 +1310,6 @@
       </div>
     </div>
 
-    <!-- Вкладка 2: Быстрые ссылки -->
     <div id="pane-links" class="tab-content-pane">
       <div class="links-page-card">
         <div style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 14px;">Мои быстрые ссылки</div>
@@ -1345,7 +1325,6 @@
       </div>
     </div>
 
-    <!-- Вкладка 3: Календарь -->
     <div id="pane-calendar" class="tab-content-pane">
       <div class="calendar-card">
         <div class="cal-header-row">
@@ -1363,7 +1342,6 @@
       </div>
     </div>
 
-    <!-- Вкладка 4: Галерея -->
     <div id="pane-gallery" class="tab-content-pane">
       <div class="gallery-card">
         <div style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 14px;">Галерея и файлы</div>
@@ -1415,7 +1393,6 @@
     let selectedCalColorHex = '#5865f2';
 
     auth.onAuthStateChanged(async (user) => {
-      // Скрываем экран загрузки при любом исходе проверки
       const loadingScreen = document.getElementById('loadingScreen');
       if (loadingScreen) loadingScreen.style.display = 'none';
 
@@ -1431,6 +1408,7 @@
         quickLinks = [];
         calendarShifts = {};
         galleryItems = [];
+        tabOrder = ['widgets', 'links', 'calendar', 'gallery'];
         if (timerInterval) clearInterval(timerInterval);
         document.getElementById('authScreen').style.display = 'flex';
         document.getElementById('dashboardScreen').style.display = 'none';
@@ -1574,8 +1552,15 @@
           quickLinks = d.links || [];
           calendarShifts = d.shifts || {};
           galleryItems = d.gallery || [];
+          
+          // Жесткая проверка: гарантируем наличие всех вкладок, включая 'gallery'
           if (d.tabOrder && Array.isArray(d.tabOrder)) {
             tabOrder = d.tabOrder;
+            ['widgets', 'links', 'calendar', 'gallery'].forEach(t => {
+              if (!tabOrder.includes(t)) tabOrder.push(t);
+            });
+          } else {
+            tabOrder = ['widgets', 'links', 'calendar', 'gallery'];
           }
         } else {
           widgets = [];
@@ -1584,7 +1569,14 @@
           galleryItems = [];
           tabOrder = ['widgets', 'links', 'calendar', 'gallery'];
         }
+        
+        // Проверка: если активная вкладка по какой-то причине отсутствует в порядке, сбрасываем на widgets
+        if (!tabOrder.includes(activeTab)) {
+          activeTab = 'widgets';
+        }
+
         renderTabsNav();
+        switchTab(activeTab);
         render();
       } catch (e) {
         console.error("Error loading user data:", e);
@@ -1617,6 +1609,7 @@
     }
 
     function switchTab(tabId) {
+      if (!tabOrder.includes(tabId)) tabId = 'widgets';
       activeTab = tabId;
       document.querySelectorAll('.tab-content-pane').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
@@ -2445,14 +2438,11 @@
 
         tweetItem.innerHTML = `
           <div class="tweet-top-row">
-            <div>
-              <span>${w.createdAt || 'Только что'}</span>
-              ${editedLabelHtml}
-            </div>
+            <span>${w.createdAt || ''} ${editedLabelHtml}</span>
             <div style="position: relative;">
-              <button class="tweet-menu-btn" onclick="toggleTweetMenu(event, ${w.id})" title="Опции">•••</button>
+              <button class="tweet-menu-btn" onclick="toggleTweetMenu(event, ${w.id})">•••</button>
               <div id="menu-${w.id}" class="tweet-dropdown-menu">
-                <button class="menu-item-edit" onclick="startEditTweet(${w.id})">Изменить</button>
+                <button class="menu-item-edit" onclick="startEditTweet(${w.id})">Редактировать</button>
                 <button class="menu-item-delete" onclick="promptDelete(${w.id})">Удалить</button>
               </div>
             </div>
@@ -2465,15 +2455,15 @@
 
       if (totalPages > 1) {
         paginationContainer.style.display = 'flex';
-        for (let i = 1; i <= totalPages; i++) {
-          const pageBtn = document.createElement('button');
-          pageBtn.className = `page-btn ${i === currentTweetPage ? 'active' : ''}`;
-          pageBtn.innerText = i;
-          pageBtn.onclick = () => {
-            currentTweetPage = i;
+        for (let p = 1; p <= totalPages; p++) {
+          const pBtn = document.createElement('button');
+          pBtn.className = `page-btn ${p === currentTweetPage ? 'active' : ''}`;
+          pBtn.innerText = p;
+          pBtn.onclick = () => {
+            currentTweetPage = p;
             render();
           };
-          paginationContainer.appendChild(pageBtn);
+          paginationContainer.appendChild(pBtn);
         }
       } else {
         paginationContainer.style.display = 'none';
@@ -2484,106 +2474,73 @@
         card.className = 'card';
         card.setAttribute('data-id', w.id);
 
-        let bodyHTML = '';
+        let innerContent = '';
 
         if (w.type === 'counter') {
-          if (!w.data || !w.data.configured) {
-            const defaultDateTime = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-            bodyHTML = `
-              <div style="display: flex; flex-direction: column; gap: 8px; margin: 6px 0 10px 0;">
-                <label style="font-size: 0.75rem; color: var(--text-muted);">Название счетчика:</label>
-                <input type="text" id="counter-name-${w.id}" class="widget-input" value="${w.title}">
-                
-                <label style="font-size: 0.75rem; color: var(--text-muted);">Дата и время начала:</label>
-                <input type="datetime-local" id="counter-date-${w.id}" class="widget-input" value="${defaultDateTime}">
-                
-                <button class="primary" style="margin-top: 4px;" onclick="saveCounterConfig(${w.id})">Начать</button>
+          const cfg = w.data && w.data.configured;
+          if (!cfg) {
+            innerContent = `
+              <div style="display: flex; flex-direction: column; gap: 8px; margin: 8px 0;">
+                <input type="text" id="counter-name-${w.id}" class="widget-input" value="${w.title}" placeholder="Название события">
+                <input type="datetime-local" id="counter-date-${w.id}" class="widget-input">
+                <button class="primary" onclick="saveCounterConfig(${w.id})">Запустить таймер</button>
               </div>
             `;
           } else {
-            const startDateObj = new Date(w.data.startTime);
-            const formattedStartDate = startDateObj.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + startDateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-
-            bodyHTML = `
-              <div>
-                <div class="counter-timer-grid" id="timer-grid-${w.id}">
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-days-${w.id}">0</div>
-                    <div class="timer-label">дней</div>
-                  </div>
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-hours-${w.id}">00</div>
-                    <div class="timer-label">часов</div>
-                  </div>
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-mins-${w.id}">00</div>
-                    <div class="timer-label">минут</div>
-                  </div>
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-secs-${w.id}">00</div>
-                    <div class="timer-label">секунд</div>
-                  </div>
-                </div>
-                <div class="counter-start-info">Начало: ${formattedStartDate}</div>
+            innerContent = `
+              <div class="counter-timer-grid" id="timer-grid-${w.id}">
+                <div class="timer-box"><div class="timer-num" id="t-days-${w.id}">0</div><div class="timer-label">дней</div></div>
+                <div class="timer-box"><div class="timer-num" id="t-hours-${w.id}">00</div><div class="timer-label">часов</div></div>
+                <div class="timer-box"><div class="timer-num" id="t-mins-${w.id}">00</div><div class="timer-label">минут</div></div>
+                <div class="timer-box"><div class="timer-num" id="t-secs-${w.id}">00</div><div class="timer-label">секунд</div></div>
               </div>
+              <div class="counter-start-info">Событие запущено</div>
             `;
           }
-        } 
-        else if (w.type === 'savings') {
+        } else if (w.type === 'savings') {
           const current = w.data.current || 0;
-          const target = w.data.target || 1;
-          const percent = Math.min(100, Math.round((current / target) * 100));
-          
-          bodyHTML = `
-            <div>
+          const target = w.data.target || 100000;
+          const percent = Math.min(Math.round((current / target) * 100), 100);
+
+          innerContent = `
+            <div style="display: flex; flex-direction: column; gap: 8px; margin: 8px 0;">
               <div class="savings-row">
-                <span>Накоплено:</span>
-                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${current}" onchange="updateSavingsCurrent(${w.id}, this.value)">
-              </div>
-              <div class="savings-row">
-                <span>Цель:</span>
-                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${target}" onchange="updateSavingsTarget(${w.id}, this.value)">
+                <span>Накоплено: <b>${current.toLocaleString()} ₽</b></span>
+                <span>Цель: <b>${target.toLocaleString()} ₽</b></span>
               </div>
               <div class="progress-bar">
                 <div class="progress-fill" style="width: ${percent}%;"></div>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Прогресс: ${percent}%</span>
-                <button class="primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openSavingsModal(${w.id})">+ Пополнить</button>
-              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-align: right;">${percent}% от цели</div>
+              <button class="primary" onclick="openSavingsModal(${w.id})">Изменить сумму</button>
             </div>
           `;
-        } 
-        else if (w.type === 'tasks') {
-          const itemsHTML = w.data.map((task, idx) => `
-            <div class="task-item ${task.done ? 'done' : ''}">
-              <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${w.id}, ${idx})">
-              <input type="text" class="widget-input" value="${task.text}" onchange="updateTaskText(${w.id}, ${idx}, this.value)">
-              <button class="btn-delete" onclick="removeTask(${w.id}, ${idx})">&times;</button>
-            </div>
-          `).join('');
+        } else if (w.type === 'tasks') {
+          const tasks = w.data || [];
+          let tasksHtml = '';
+          tasks.forEach((t, tIdx) => {
+            tasksHtml += `
+              <div class="task-item ${t.done ? 'done' : ''}">
+                <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${w.id}, ${tIdx})">
+                <input type="text" class="widget-input" value="${t.text}" oninput="updateTaskText(${w.id}, ${tIdx}, this.value)">
+              </div>
+            `;
+          });
 
-          bodyHTML = `
-            <div class="task-list">${itemsHTML}</div>
-            <button onclick="addTask(${w.id})" style="width: 100%;">+ Добавить задачу</button>
+          innerContent = `
+            <div class="task-list" style="margin: 8px 0;">
+              ${tasksHtml}
+            </div>
+            <button class="primary" onclick="addTaskItem(${w.id})">+ Добавить задачу</button>
           `;
         }
 
-        const showTitleHeader = (w.type !== 'counter' || (w.data && w.data.configured));
-
         card.innerHTML = `
-          ${showTitleHeader ? `
-            <div class="card-header">
-              <span class="card-title" contenteditable="true" onblur="updateTitle(${w.id}, this.innerText)">${w.title}</span>
-              <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
-            </div>
-          ` : `
-            <div class="card-header">
-              <span class="card-title">Настройка счетчика</span>
-              <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
-            </div>
-          `}
-          ${bodyHTML}
+          <div class="card-header">
+            <div class="card-title" contenteditable="true" onblur="updateWidgetTitle(${w.id}, this.innerText)">${w.title}</div>
+            <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
+          </div>
+          ${innerContent}
         `;
 
         setupDragAndDropForCard(card, w.id);
@@ -2591,50 +2548,41 @@
       });
     }
 
-    function updateTitle(id, newTitle) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.title = newTitle;
+    function toggleTask(widgetId, taskIdx) {
+      const widget = widgets.find(w => w.id === widgetId);
+      if (widget && widget.data[taskIdx]) {
+        widget.data[taskIdx].done = !widget.data[taskIdx].done;
         saveAndRender();
       }
     }
 
-    function updateSavingsTarget(id, val) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data.target = parseFloat(val) || 1;
-        saveAndRender();
+    function updateTaskText(widgetId, taskIdx, text) {
+      const widget = widgets.find(w => w.id === widgetId);
+      if (widget && widget.data[taskIdx]) {
+        widget.data[taskIdx].text = text;
+        if (!currentUser) return;
+        db.collection('users').doc(currentUser.uid).collection('data').doc('widgets').set({
+          list: widgets,
+          links: quickLinks,
+          shifts: calendarShifts,
+          gallery: galleryItems,
+          tabOrder: tabOrder
+        }, { merge: true });
       }
     }
 
-    function addTask(id) {
-      const widget = widgets.find(w => w.id === id);
+    function addTaskItem(widgetId) {
+      const widget = widgets.find(w => w.id === widgetId);
       if (widget) {
         widget.data.push({ text: 'Новая задача', done: false });
         saveAndRender();
       }
     }
 
-    function toggleTask(id, idx) {
+    function updateWidgetTitle(id, newTitle) {
       const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data[idx].done = !widget.data[idx].done;
-        saveAndRender();
-      }
-    }
-
-    function updateTaskText(id, idx, val) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data[idx].text = val;
-        saveAndRender();
-      }
-    }
-
-    function removeTask(id, idx) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data.splice(idx, 1);
+      if (widget && newTitle.trim()) {
+        widget.title = newTitle.trim();
         saveAndRender();
       }
     }
