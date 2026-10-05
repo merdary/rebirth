@@ -917,6 +917,115 @@
       color: var(--danger-color);
     }
 
+    /* Стили вкладки «Галерея» */
+    .gallery-page-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .gallery-item {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .gallery-item:hover {
+      border-color: var(--text-muted);
+      transform: scale(1.02);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+    }
+
+    .gallery-item-footer {
+      padding: 8px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .gallery-delete-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      z-index: 2;
+    }
+
+    .gallery-delete-btn:hover {
+      background: var(--danger-color);
+    }
+
+    /* Модальное окно просмотра картинки */
+    #imageModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    #imageModal.show {
+      display: flex;
+    }
+
+    .modal-image-content {
+      max-width: 90%;
+      max-height: 85vh;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+
+    .modal-close-preview {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+
     /* Стили вкладки «Календарь» (График смен) */
     .calendar-card {
       background-color: var(--card-bg);
@@ -1081,6 +1190,12 @@
 </head>
 <body>
 
+  <!-- Модальное окно просмотра картинки -->
+  <div id="imageModal" onclick="closeImageModal()">
+    <button class="modal-close-preview">&times;</button>
+    <img id="modalFullImage" class="modal-image-content" src="" alt="Full preview">
+  </div>
+
   <!-- Модальное окно подтверждения удаления -->
   <div id="deleteModal" class="modal-overlay">
     <div class="modal-card">
@@ -1201,6 +1316,7 @@
     <div class="tabs-nav-container" id="tabsNavContainer">
       <button class="tab-nav-btn active" data-tab="widgets" draggable="true" onclick="switchTab('widgets')">📊 Виджеты</button>
       <button class="tab-nav-btn" data-tab="links" draggable="true" onclick="switchTab('links')">🔗 Быстрые ссылки</button>
+      <button class="tab-nav-btn" data-tab="gallery" draggable="true" onclick="switchTab('gallery')">🖼️ Галерея</button>
       <button class="tab-nav-btn" data-tab="calendar" draggable="true" onclick="switchTab('calendar')">📅 Календарь</button>
     </div>
 
@@ -1251,7 +1367,23 @@
       </div>
     </div>
 
-    <!-- Вкладка 3: Календарь -->
+    <!-- Вкладка 3: Галерея -->
+    <div id="pane-gallery" class="tab-content-pane">
+      <div class="gallery-page-card">
+        <div style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 14px;">Моя галерея</div>
+        <div class="gallery-grid" id="galleryGrid"></div>
+        <div style="border-top: 1px solid var(--border-color); padding-top: 14px; margin-top: 10px;">
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Добавить изображение по URL:</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="text" id="newGalleryTitle" class="widget-input" placeholder="Подпись (необязательно)" style="flex: 1; min-width: 140px;">
+            <input type="text" id="newGalleryUrl" class="widget-input" placeholder="Прямая ссылка на изображение (URL)" style="flex: 2; min-width: 180px;">
+            <button class="primary" onclick="addGalleryItem()">Добавить фото</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Вкладка 4: Календарь -->
     <div id="pane-calendar" class="tab-content-pane">
       <div class="calendar-card">
         <div class="cal-header-row">
@@ -1289,8 +1421,9 @@
     let currentUser = null;
     let widgets = [];
     let quickLinks = [];
+    let galleryImages = [];
     let calendarShifts = {};
-    let tabOrder = ['widgets', 'links', 'calendar'];
+    let tabOrder = ['widgets', 'links', 'gallery', 'calendar'];
     let activeTab = 'widgets';
 
     let currentTweetPage = 1;
@@ -1316,6 +1449,7 @@
         currentUser = null;
         widgets = [];
         quickLinks = [];
+        galleryImages = [];
         calendarShifts = {};
         if (timerInterval) clearInterval(timerInterval);
         document.getElementById('authScreen').style.display = 'flex';
@@ -1386,8 +1520,9 @@
         await db.collection('users').doc(user.uid).collection('data').doc('widgets').set({
           list: [],
           links: [],
+          gallery: [],
           shifts: {},
-          tabOrder: ['widgets', 'links', 'calendar']
+          tabOrder: ['widgets', 'links', 'gallery', 'calendar']
         });
 
       } catch (error) {
@@ -1457,15 +1592,19 @@
           const d = doc.data();
           widgets = d.list || [];
           quickLinks = d.links || [];
+          galleryImages = d.gallery || [];
           calendarShifts = d.shifts || {};
           if (d.tabOrder && Array.isArray(d.tabOrder)) {
             tabOrder = d.tabOrder;
+          } else {
+            tabOrder = ['widgets', 'links', 'gallery', 'calendar'];
           }
         } else {
           widgets = [];
           quickLinks = [];
+          galleryImages = [];
           calendarShifts = {};
-          tabOrder = ['widgets', 'links', 'calendar'];
+          tabOrder = ['widgets', 'links', 'gallery', 'calendar'];
         }
         renderTabsNav();
         render();
@@ -1486,6 +1625,7 @@
         await db.collection('users').doc(currentUser.uid).collection('data').doc('widgets').set({
           list: widgets,
           links: quickLinks,
+          gallery: galleryImages,
           shifts: calendarShifts,
           tabOrder: tabOrder
         });
@@ -1521,6 +1661,7 @@
       const tabTitles = {
         widgets: '📊 Виджеты',
         links: '🔗 Быстрые ссылки',
+        gallery: '🖼️ Галерея',
         calendar: '📅 Календарь'
       };
 
@@ -1611,6 +1752,44 @@
       saveAndRender();
     }
 
+    // Функции Галереи
+    function addGalleryItem() {
+      const titleInput = document.getElementById('newGalleryTitle');
+      const urlInput = document.getElementById('newGalleryUrl');
+      let title = titleInput.value.trim();
+      let url = urlInput.value.trim();
+
+      if (!url) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      if (!title) {
+        title = 'Фото';
+      }
+
+      galleryImages.unshift({ title, url });
+      titleInput.value = '';
+      urlInput.value = '';
+      saveAndRender();
+    }
+
+    function removeGalleryItem(idx) {
+      galleryImages.splice(idx, 1);
+      saveAndRender();
+    }
+
+    function openImageModal(url) {
+      const modal = document.getElementById('imageModal');
+      const fullImg = document.getElementById('modalFullImage');
+      fullImg.src = url;
+      modal.classList.add('show');
+    }
+
+    function closeImageModal() {
+      const modal = document.getElementById('imageModal');
+      modal.classList.remove('show');
+    }
+
     let draggedLinkIndex = null;
 
     function setupDragAndDropForLink(tile, index) {
@@ -1644,7 +1823,6 @@
         }
       });
 
-      // Поддержка сенсорных экранов (смартфонов)
       let touchTimeout = null;
       let startX = 0, startY = 0;
       let isTouchActive = false;
@@ -2205,12 +2383,15 @@
       const tweetsDivider = document.getElementById('tweetsDivider');
       const paginationContainer = document.getElementById('paginationContainer');
       const linksPageGrid = document.getElementById('linksPageGrid');
+      const galleryGrid = document.getElementById('galleryGrid');
 
       mainGrid.innerHTML = '';
       twitterTweetsList.innerHTML = '';
       paginationContainer.innerHTML = '';
       linksPageGrid.innerHTML = '';
+      galleryGrid.innerHTML = '';
 
+      // Рендер быстрых ссылок
       quickLinks.forEach((link, idx) => {
         let domain = '';
         try { domain = new URL(link.url).hostname; } catch(e) { domain = 'google.com'; }
@@ -2234,6 +2415,21 @@
 
         setupDragAndDropForLink(tile, idx);
         linksPageGrid.appendChild(tile);
+      });
+
+      // Рендер галереи
+      galleryImages.forEach((imgItem, idx) => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+
+        item.innerHTML = `
+          <button class="gallery-delete-btn" onclick="event.stopPropagation(); removeGalleryItem(${idx})" title="Удалить">&times;</button>
+          <img src="${imgItem.url}" alt="${imgItem.title}" onerror="this.src='icon.png'">
+          <div class="gallery-item-footer">${imgItem.title}</div>
+        `;
+
+        item.onclick = () => openImageModal(imgItem.url);
+        galleryGrid.appendChild(item);
       });
 
       const diaryWidgets = widgets.filter(w => w.type === 'diary');
