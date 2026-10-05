@@ -64,9 +64,21 @@
       gap: 8px;
     }
 
+    /* Экран Загрузки (предотвращает моргание вкладок) */
+    #loadingScreen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 85vh;
+      color: var(--text-muted);
+      font-size: 1rem;
+      gap: 12px;
+    }
+
     /* Экран Авторизации */
     #authScreen {
-      display: flex;
+      display: none;
       justify-content: center;
       align-items: center;
       min-height: 85vh;
@@ -1215,6 +1227,11 @@
     </div>
   </div>
 
+  <!-- Экран Загрузки (предотвращает прыжки интерфейса) -->
+  <div id="loadingScreen">
+    <div>Загрузка...</div>
+  </div>
+
   <!-- Экран Входа / Регистрации -->
   <div id="authScreen">
     <div class="auth-card">
@@ -1398,6 +1415,10 @@
     let selectedCalColorHex = '#5865f2';
 
     auth.onAuthStateChanged(async (user) => {
+      // Скрываем экран загрузки при любом исходе проверки
+      const loadingScreen = document.getElementById('loadingScreen');
+      if (loadingScreen) loadingScreen.style.display = 'none';
+
       if (user) {
         currentUser = user;
         document.getElementById('authScreen').style.display = 'none';
