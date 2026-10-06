@@ -292,23 +292,10 @@
       gap: 6px;
     }
 
-    .tab-nav-btn:active {
-      cursor: grabbing;
-    }
-
     .tab-nav-btn.active {
       background-color: var(--card-hover);
       color: #ffffff;
       border-color: var(--text-muted);
-    }
-
-    .tab-nav-btn.dragging {
-      opacity: 0.4;
-    }
-
-    .tab-nav-btn.drag-over {
-      border-color: var(--text-main);
-      background-color: var(--card-hover);
     }
 
     .tab-content-pane {
@@ -619,18 +606,22 @@
       cursor: grab;
       user-select: none;
       -webkit-user-select: none;
-      transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s;
+      transition: border-color 0.2s;
       touch-action: pan-y;
+      position: relative;
     }
 
     .card:active {
       cursor: grabbing;
     }
 
-    .card.dragging {
-      opacity: 0.4;
-      transform: scale(0.97);
-      border-color: var(--text-muted);
+    .card.dragging-touch {
+      opacity: 0.85;
+      transform: scale(1.03);
+      border-color: var(--accent-color);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      pointer-events: none;
     }
 
     .card.drag-over {
@@ -848,7 +839,7 @@
       gap: 8px;
       text-decoration: none;
       color: var(--text-main);
-      transition: background-color 0.2s, border-color 0.2s, transform 0.2s, opacity 0.2s;
+      transition: background-color 0.2s, border-color 0.2s;
       position: relative;
       cursor: grab;
       user-select: none;
@@ -858,18 +849,6 @@
 
     .link-page-tile:active {
       cursor: grabbing;
-    }
-
-    .link-page-tile.dragging {
-      opacity: 0.4;
-      transform: scale(0.95);
-      border-color: var(--text-muted);
-    }
-
-    .link-page-tile.drag-over {
-      border-color: var(--text-muted);
-      background-color: var(--card-hover);
-      transform: translateY(-2px);
     }
 
     .link-page-tile:hover {
@@ -1008,7 +987,6 @@
       color: #ffffff;
     }
 
-    /* Индикатор наличия заметки (белая точка справа вверху) */
     .cal-day-note-dot {
       position: absolute;
       top: 6px;
@@ -1068,7 +1046,6 @@
       padding: 12px;
     }
 
-    /* Стили для селектора смен в модалке календаря (Яркий желтый и насыщенный фиолетовый) */
     .shift-select-row {
       display: flex;
       gap: 8px;
@@ -1134,7 +1111,7 @@
     </div>
   </div>
 
-  <!-- Модальное окно настройки дня в календаре (График смен и заметки) -->
+  <!-- Модальное окно настройки дня в календаре -->
   <div id="calendarDayModal" class="modal-overlay">
     <div class="modal-card" style="text-align: left;">
       <div class="modal-text" id="calModalDateTitle" style="font-weight: 600; color: #fff; text-align: center;">Настройка дня</div>
@@ -1338,7 +1315,7 @@
 
     let calDate = new Date();
     let selectedCalDateStr = null;
-    let selectedShiftType = 'none'; // 'none', 'day', 'night'
+    let selectedShiftType = 'none';
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -1383,18 +1360,13 @@
       e.preventDefault();
       const loginError = document.getElementById('loginError');
       loginError.innerText = '';
-
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
       try {
         await auth.signInWithEmailAndPassword(email, password);
       } catch (error) {
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-          loginError.innerText = 'неверный логин или пароль';
-        } else {
-          loginError.innerText = 'ошибка входа в аккаунт';
-        }
+        loginError.innerText = 'неверный логин или пароль';
       }
     }
 
@@ -1423,15 +1395,8 @@
           shifts: {},
           tabOrder: ['widgets', 'links', 'calendar']
         });
-
       } catch (error) {
-        if (error.code === 'auth/email-already-in-use') {
-          regError.innerText = 'пользователь уже зарегистрирован';
-        } else if (error.code === 'auth/weak-password') {
-          regError.innerText = 'пароль слишком простой (мин. 6 символов)';
-        } else {
-          regError.innerText = 'ошибка при регистрации';
-        }
+        regError.innerText = 'ошибка при регистрации';
       }
     }
 
@@ -1457,16 +1422,10 @@
 
       try {
         await auth.sendPasswordResetEmail(email);
-        alert('Инструкции по восстановлению пароля отправлены на почту: ' + email);
+        alert('Инструкции отправлены на почту: ' + email);
         closeForgotModal();
       } catch (error) {
-        if (error.code === 'auth/user-not-found') {
-          forgotError.innerText = 'пользователь с такой почтой не найден';
-        } else if (error.code === 'auth/invalid-email') {
-          forgotError.innerText = 'некорректный формат почты';
-        } else {
-          forgotError.innerText = 'ошибка отправки письма';
-        }
+        forgotError.innerText = 'ошибка отправки письма';
       }
     }
 
@@ -1506,7 +1465,7 @@
         renderTabsNav();
         render();
       } catch (e) {
-        console.error("Error loading user data:", e);
+        console.error(e);
       }
     }
 
@@ -1528,7 +1487,6 @@
         syncStatus.innerText = '● Синхр.';
         syncStatus.style.color = 'var(--success-color)';
       } catch (e) {
-        console.error("Error saving data:", e);
         syncStatus.innerText = '● Ошибка';
         syncStatus.style.color = 'var(--danger-color)';
       }
@@ -1564,58 +1522,10 @@
         const btn = document.createElement('button');
         btn.className = `tab-nav-btn ${tabId === activeTab ? 'active' : ''}`;
         btn.setAttribute('data-tab', tabId);
-        btn.setAttribute('draggable', 'true');
         btn.innerText = tabTitles[tabId] || tabId;
         btn.onclick = () => switchTab(tabId);
-
-        setupTabDragAndDrop(btn, tabId);
         container.appendChild(btn);
       });
-    }
-
-    let draggedTabId = null;
-
-    function setupTabDragAndDrop(btn, tabId) {
-      btn.addEventListener('dragstart', (e) => {
-        draggedTabId = tabId;
-        setTimeout(() => btn.classList.add('dragging'), 0);
-      });
-
-      btn.addEventListener('dragend', () => {
-        btn.classList.remove('dragging');
-        draggedTabId = null;
-        document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('drag-over'));
-      });
-
-      btn.addEventListener('dragover', (e) => e.preventDefault());
-
-      btn.addEventListener('dragenter', (e) => {
-        e.preventDefault();
-        if (tabId !== draggedTabId) {
-          btn.classList.add('drag-over');
-        }
-      });
-
-      btn.addEventListener('dragleave', () => btn.classList.remove('drag-over'));
-
-      btn.addEventListener('drop', (e) => {
-        e.preventDefault();
-        btn.classList.remove('drag-over');
-        if (draggedTabId !== null && draggedTabId !== tabId) {
-          reorderTabs(draggedTabId, tabId);
-        }
-      });
-    }
-
-    function reorderTabs(fromId, toId) {
-      const fromIdx = tabOrder.indexOf(fromId);
-      const toIdx = tabOrder.indexOf(toId);
-      if (fromIdx !== -1 && toIdx !== -1) {
-        const [moved] = tabOrder.splice(fromIdx, 1);
-        tabOrder.splice(toIdx, 0, moved);
-        renderTabsNav();
-        saveAndRender();
-      }
     }
 
     function addPageLinkItem() {
@@ -1629,11 +1539,7 @@
         url = 'https://' + url;
       }
       if (!name) {
-        try {
-          name = new URL(url).hostname.replace('www.', '');
-        } catch(e) {
-          name = 'Сайт';
-        }
+        try { name = new URL(url).hostname.replace('www.', ''); } catch(e) { name = 'Сайт'; }
       }
 
       quickLinks.push({ name, url });
@@ -1644,46 +1550,6 @@
 
     function removePageLinkItem(idx) {
       quickLinks.splice(idx, 1);
-      saveAndRender();
-    }
-
-    let draggedLinkIndex = null;
-
-    function setupDragAndDropForLink(tile, index) {
-      tile.addEventListener('dragstart', (e) => {
-        draggedLinkIndex = index;
-        setTimeout(() => tile.classList.add('dragging'), 0);
-      });
-
-      tile.addEventListener('dragend', () => {
-        tile.classList.remove('dragging');
-        draggedLinkIndex = null;
-        document.querySelectorAll('.link-page-tile').forEach(t => t.classList.remove('drag-over'));
-      });
-
-      tile.addEventListener('dragover', (e) => e.preventDefault());
-
-      tile.addEventListener('dragenter', (e) => {
-        e.preventDefault();
-        if (index !== draggedLinkIndex) {
-          tile.classList.add('drag-over');
-        }
-      });
-
-      tile.addEventListener('dragleave', () => tile.classList.remove('drag-over'));
-
-      tile.addEventListener('drop', (e) => {
-        e.preventDefault();
-        tile.classList.remove('drag-over');
-        if (draggedLinkIndex !== null && draggedLinkIndex !== index) {
-          reorderLinks(draggedLinkIndex, index);
-        }
-      });
-    }
-
-    function reorderLinks(fromIdx, toIdx) {
-      const [moved] = quickLinks.splice(fromIdx, 1);
-      quickLinks.splice(toIdx, 0, moved);
       saveAndRender();
     }
 
@@ -1704,15 +1570,11 @@
 
       const year = calDate.getFullYear();
       const month = calDate.getMonth();
-
       const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
       titleEl.innerText = `${monthNames[month]} ${year}`;
 
       const nowLocal = new Date();
-      const todayYear = nowLocal.getFullYear();
-      const todayMonth = nowLocal.getMonth();
-      const todayDate = nowLocal.getDate();
-      const todayStr = `${todayYear}-${String(todayMonth + 1).padStart(2, '0')}-${String(todayDate).padStart(2, '0')}`;
+      const todayStr = `${nowLocal.getFullYear()}-${String(nowLocal.getMonth() + 1).padStart(2, '0')}-${String(nowLocal.getDate()).padStart(2, '0')}`;
 
       const firstDayOfMonth = new Date(year, month, 1);
       let startingDay = firstDayOfMonth.getDay();
@@ -1720,37 +1582,24 @@
 
       const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
       const prevMonthDays = new Date(year, month, 0).getDate();
-
       let daysArray = [];
 
       for (let i = startingDay - 1; i >= 0; i--) {
         const dNum = prevMonthDays - i;
         const prevMonth = month === 0 ? 11 : month - 1;
         const prevYear = month === 0 ? year - 1 : year;
-        daysArray.push({
-          day: dNum,
-          isCurrentMonth: false,
-          dateStr: `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`
-        });
+        daysArray.push({ day: dNum, isCurrentMonth: false, dateStr: `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(dNum).padStart(2, '0')}` });
       }
 
       for (let i = 1; i <= totalDaysInMonth; i++) {
-        daysArray.push({
-          day: i,
-          isCurrentMonth: true,
-          dateStr: `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`
-        });
+        daysArray.push({ day: i, isCurrentMonth: true, dateStr: `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}` });
       }
 
       let nextMonthDay = 1;
       while (daysArray.length % 7 !== 0) {
         const nextMonth = month === 11 ? 0 : month + 1;
         const nextYear = month === 11 ? year + 1 : year;
-        daysArray.push({
-          day: nextMonthDay,
-          isCurrentMonth: false,
-          dateStr: `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(nextMonthDay).padStart(2, '0')}`
-        });
+        daysArray.push({ day: nextMonthDay, isCurrentMonth: false, dateStr: `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(nextMonthDay).padStart(2, '0')}` });
         nextMonthDay++;
       }
 
@@ -1764,23 +1613,12 @@
         let noteDotHtml = '';
 
         if (dayData) {
-          if (dayData.shift === 'day') {
-            badgeHtml = `<div class="cal-day-badge" style="background-color: #e3af34;">день</div>`;
-          } else if (dayData.shift === 'night') {
-            badgeHtml = `<div class="cal-day-badge" style="background-color: #8c52ff;">ночь</div>`;
-          }
-
-          if (dayData.note && dayData.note.trim() !== '') {
-            noteDotHtml = `<div class="cal-day-note-dot" title="Есть заметка"></div>`;
-          }
+          if (dayData.shift === 'day') badgeHtml = `<div class="cal-day-badge" style="background-color: #e3af34;">день</div>`;
+          else if (dayData.shift === 'night') badgeHtml = `<div class="cal-day-badge" style="background-color: #8c52ff;">ночь</div>`;
+          if (dayData.note && dayData.note.trim() !== '') noteDotHtml = `<div class="cal-day-note-dot"></div>`;
         }
 
-        cell.innerHTML = `
-          <div class="cal-day-num">${item.day}</div>
-          ${noteDotHtml}
-          ${badgeHtml}
-        `;
-
+        cell.innerHTML = `<div class="cal-day-num">${item.day}</div>${noteDotHtml}${badgeHtml}`;
         cell.onclick = () => openCalendarDayModal(item.dateStr, item.day, monthNames[month], year);
         gridEl.appendChild(cell);
       });
@@ -1789,15 +1627,11 @@
     function openCalendarDayModal(dateStr, dayNum, monthName, year) {
       selectedCalDateStr = dateStr;
       document.getElementById('calModalDateTitle').innerText = `${dayNum} ${monthName} ${year}`;
-      
       const existing = calendarShifts[dateStr] || { shift: 'none', note: '' };
       selectedShiftType = existing.shift || 'none';
       document.getElementById('calDayNoteInput').value = existing.note || '';
-
       updateShiftButtonsUI();
-
       document.getElementById('calendarDayModal').classList.add('show');
-      setTimeout(() => document.getElementById('calDayNoteInput').focus(), 50);
     }
 
     function closeCalendarDayModal() {
@@ -1814,24 +1648,16 @@
       document.getElementById('shiftBtnNone').classList.remove('selected');
       document.getElementById('shiftBtnDay').classList.remove('selected');
       document.getElementById('shiftBtnNight').classList.remove('selected');
-
-      if (selectedShiftType === 'day') {
-        document.getElementById('shiftBtnDay').classList.add('selected');
-      } else if (selectedShiftType === 'night') {
-        document.getElementById('shiftBtnNight').classList.add('selected');
-      } else {
-        document.getElementById('shiftBtnNone').classList.add('selected');
-      }
+      if (selectedShiftType === 'day') document.getElementById('shiftBtnDay').classList.add('selected');
+      else if (selectedShiftType === 'night') document.getElementById('shiftBtnNight').classList.add('selected');
+      else document.getElementById('shiftBtnNone').classList.add('selected');
     }
 
     function saveCalendarDayData() {
       const noteText = document.getElementById('calDayNoteInput').value.trim();
       if (selectedCalDateStr) {
         if (selectedShiftType !== 'none' || noteText !== '') {
-          calendarShifts[selectedCalDateStr] = {
-            shift: selectedShiftType,
-            note: noteText
-          };
+          calendarShifts[selectedCalDateStr] = { shift: selectedShiftType, note: noteText };
         } else {
           delete calendarShifts[selectedCalDateStr];
         }
@@ -1865,35 +1691,19 @@
         defaultData = [{ text: 'Первая задача', done: false }];
       }
 
-      const newWidget = {
-        id: Date.now(),
-        type: type,
-        title: defaultTitle,
-        data: defaultData
-      };
-      
-      widgets.push(newWidget);
+      widgets.push({ id: Date.now(), type, title: defaultTitle, data: defaultData });
       saveAndRender();
     }
 
     function saveCounterConfig(id) {
       const nameInput = document.getElementById('counter-name-' + id);
       const dateInput = document.getElementById('counter-date-' + id);
-
-      if (!dateInput.value) {
-        alert('Пожалуйста, выберите дату и время начала!');
-        return;
-      }
+      if (!dateInput.value) return;
 
       const widget = widgets.find(w => w.id === id);
       if (widget) {
-        if (nameInput && nameInput.value.trim()) {
-          widget.title = nameInput.value.trim();
-        }
-        widget.data = {
-          configured: true,
-          startTime: new Date(dateInput.value).getTime()
-        };
+        if (nameInput && nameInput.value.trim()) widget.title = nameInput.value.trim();
+        widget.data = { configured: true, startTime: new Date(dateInput.value).getTime() };
         saveAndRender();
       }
     }
@@ -1901,27 +1711,18 @@
     function startGlobalTimer() {
       if (timerInterval) clearInterval(timerInterval);
       timerInterval = setInterval(() => {
-        const counterWidgets = widgets.filter(w => w.type === 'counter' && w.data && w.data.configured);
-        counterWidgets.forEach(w => {
-          const timerNode = document.getElementById('timer-grid-' + w.id);
-          if (timerNode) {
-            const diff = Date.now() - w.data.startTime;
-            if (diff >= 0) {
-              const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-              const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-              const minutes = Math.floor((diff / 1000 / 60) % 60);
-              const seconds = Math.floor((diff / 1000) % 60);
+        widgets.filter(w => w.type === 'counter' && w.data && w.data.configured).forEach(w => {
+          const diff = Date.now() - w.data.startTime;
+          if (diff >= 0) {
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diff / 1000 / 60) % 60);
+            const s = Math.floor((diff / 1000) % 60);
 
-              const dElem = document.getElementById('t-days-' + w.id);
-              const hElem = document.getElementById('t-hours-' + w.id);
-              const mElem = document.getElementById('t-mins-' + w.id);
-              const sElem = document.getElementById('t-secs-' + w.id);
-
-              if (dElem) dElem.innerText = days;
-              if (hElem) hElem.innerText = String(hours).padStart(2, '0');
-              if (mElem) mElem.innerText = String(minutes).padStart(2, '0');
-              if (sElem) sElem.innerText = String(seconds).padStart(2, '0');
-            }
+            if (document.getElementById('t-days-' + w.id)) document.getElementById('t-days-' + w.id).innerText = d;
+            if (document.getElementById('t-hours-' + w.id)) document.getElementById('t-hours-' + w.id).innerText = String(h).padStart(2, '0');
+            if (document.getElementById('t-mins-' + w.id)) document.getElementById('t-mins-' + w.id).innerText = String(m).padStart(2, '0');
+            if (document.getElementById('t-secs-' + w.id)) document.getElementById('t-secs-' + w.id).innerText = String(s).padStart(2, '0');
           }
         });
       }, 1000);
@@ -1942,15 +1743,7 @@
       const now = new Date();
       const timeString = now.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-      const newTweet = {
-        id: Date.now(),
-        type: 'diary',
-        createdAt: timeString,
-        isEdited: false,
-        data: { text: text }
-      };
-
-      widgets.unshift(newTweet);
+      widgets.unshift({ id: Date.now(), type: 'diary', createdAt: timeString, isEdited: false, data: { text } });
       input.value = '';
       currentTweetPage = 1;
       saveAndRender();
@@ -1970,11 +1763,6 @@
     document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
       if (pendingDeleteId !== null) {
         widgets = widgets.filter(w => w.id !== pendingDeleteId);
-        const diaryWidgets = widgets.filter(w => w.type === 'diary');
-        const totalPages = Math.ceil(diaryWidgets.length / tweetsPerPage) || 1;
-        if (currentTweetPage > totalPages) {
-          currentTweetPage = totalPages;
-        }
         closeDeleteModal();
         saveAndRender();
       }
@@ -1984,7 +1772,6 @@
       activeSavingsWidgetId = id;
       document.getElementById('savingsAmountInput').value = '';
       document.getElementById('addSavingsModal').classList.add('show');
-      setTimeout(() => document.getElementById('savingsAmountInput').focus(), 50);
     }
 
     function closeSavingsModal() {
@@ -1993,19 +1780,13 @@
     }
 
     function confirmAddSavings() {
-      const valInput = document.getElementById('savingsAmountInput');
-      const addVal = parseFloat(valInput.value);
-
-      if (isNaN(addVal)) {
-        alert('Введите корректную сумму!');
-        return;
-      }
+      const addVal = parseFloat(document.getElementById('savingsAmountInput').value);
+      if (isNaN(addVal)) return;
 
       if (activeSavingsWidgetId !== null) {
         const widget = widgets.find(w => w.id === activeSavingsWidgetId);
         if (widget) {
-          widget.data.current = (widget.data.current || 0) + addVal;
-          if (widget.data.current < 0) widget.data.current = 0;
+          widget.data.current = Math.max(0, (widget.data.current || 0) + addVal);
           saveAndRender();
         }
       }
@@ -2015,9 +1796,7 @@
     function updateSavingsCurrent(id, val) {
       const widget = widgets.find(w => w.id === id);
       if (widget) {
-        const parsed = parseFloat(val);
-        widget.data.current = isNaN(parsed) ? 0 : parsed;
-        if (widget.data.current < 0) widget.data.current = 0;
+        widget.data.current = Math.max(0, parseFloat(val) || 0);
         saveAndRender();
       }
     }
@@ -2025,8 +1804,7 @@
     function toggleUserProfileMenu(e) {
       e.stopPropagation();
       closeAllMenus();
-      const menu = document.getElementById('userDropdownMenu');
-      menu.classList.toggle('show');
+      document.getElementById('userDropdownMenu').classList.toggle('show');
     }
 
     function toggleTweetMenu(event, id) {
@@ -2037,8 +1815,7 @@
     }
 
     function closeAllMenus() {
-      document.querySelectorAll('.user-dropdown-box').forEach(m => m.classList.remove('show'));
-      document.querySelectorAll('.tweet-dropdown-menu').forEach(m => m.classList.remove('show'));
+      document.querySelectorAll('.user-dropdown-box, .tweet-dropdown-menu').forEach(m => m.classList.remove('show'));
     }
 
     window.addEventListener('click', () => closeAllMenus());
@@ -2050,15 +1827,11 @@
 
     function startEditTweet(id) {
       const itemNode = document.getElementById('tweet-item-' + id);
-      if (!itemNode) return;
       const widget = widgets.find(w => w.id === id);
-      if (!widget) return;
+      if (!itemNode || !widget) return;
 
       itemNode.innerHTML = `
-        <div class="tweet-top-row">
-          <span>${widget.createdAt || ''}</span>
-          <span style="font-size: 0.75rem; color: var(--text-muted);">Редактирование...</span>
-        </div>
+        <div class="tweet-top-row"><span>${widget.createdAt || ''}</span></div>
         <textarea id="edit-text-${id}" class="widget-input" rows="2">${widget.data.text || ''}</textarea>
         <div class="btn-group" style="margin-top: 6px;">
           <button class="primary" onclick="saveEditTweet(${id})">Сохранить</button>
@@ -2070,47 +1843,96 @@
     function saveEditTweet(id) {
       const textarea = document.getElementById('edit-text-' + id);
       if (!textarea) return;
-      const newText = textarea.value.trim();
       const widget = widgets.find(w => w.id === id);
       if (widget) {
-        widget.data.text = newText;
+        widget.data.text = textarea.value.trim();
         widget.isEdited = true;
         saveAndRender();
       }
     }
 
-    let draggedId = null;
-
+    // --- УНИВЕРСАЛЬНЫЙ DRAG-AND-DROP (ПК + СЕНСОРНЫЕ ТЕЛЕФОНЫ) ---
     function setupDragAndDropForCard(cardElement, id) {
       cardElement.setAttribute('draggable', 'true');
 
+      // ПК (HTML5 Drag & Drop)
       cardElement.addEventListener('dragstart', (e) => {
-        draggedId = id;
-        setTimeout(() => cardElement.classList.add('dragging'), 0);
+        e.dataTransfer.setData('text/plain', id);
+        setTimeout(() => cardElement.classList.add('dragging-touch'), 0);
       });
-
-      cardElement.addEventListener('dragend', () => {
-        cardElement.classList.remove('dragging');
-        draggedId = null;
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
-      });
-
+      cardElement.addEventListener('dragend', () => cardElement.classList.remove('dragging-touch'));
       cardElement.addEventListener('dragover', (e) => e.preventDefault());
-
-      cardElement.addEventListener('dragenter', (e) => {
-        e.preventDefault();
-        if (id !== draggedId) cardElement.classList.add('drag-over');
-      });
-
-      cardElement.addEventListener('dragleave', () => cardElement.classList.remove('drag-over'));
-
       cardElement.addEventListener('drop', (e) => {
         e.preventDefault();
-        cardElement.classList.remove('drag-over');
-        if (draggedId !== null && draggedId !== id) {
-          reorderWidgets(draggedId, id);
+        const fromId = parseInt(e.dataTransfer.getData('text/plain'));
+        if (fromId && fromId !== id) reorderWidgets(fromId, id);
+      });
+
+      // Телефон (Touch Events)
+      let touchStartY = 0;
+      let clone = null;
+
+      cardElement.addEventListener('touchstart', (e) => {
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('[contenteditable]')) return;
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      cardElement.addEventListener('touchmove', (e) => {
+        const touchY = e.touches[0].clientY;
+        if (Math.abs(touchY - touchStartY) > 15 && !clone) {
+          cardElement.classList.add('dragging-touch');
+          clone = cardElement.cloneNode(true);
+          clone.style.position = 'fixed';
+          clone.style.width = cardElement.offsetWidth + 'px';
+          clone.style.zIndex = '9999';
+          clone.style.opacity = '0.8';
+          document.body.appendChild(clone);
+          moveClone(e.touches[0].clientX, touchY);
+        }
+        if (clone) {
+          e.preventDefault();
+          moveClone(e.touches[0].clientX, touchY);
+          
+          // Определяем над каким элементом палец
+          clone.style.display = 'none';
+          let elemBelow = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+          clone.style.display = 'block';
+
+          let targetCard = elemBelow ? elemBelow.closest('.card') : null;
+          document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
+          if (targetCard && targetCard !== cardElement) {
+            targetCard.classList.add('drag-over');
+          }
+        }
+      }, { passive: false });
+
+      cardElement.addEventListener('touchend', (e) => {
+        if (clone) {
+          clone.style.display = 'none';
+          let touch = e.changedTouches[0];
+          let elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+          let targetCard = elemBelow ? elemBelow.closest('.card') : null;
+
+          if (targetCard) {
+            let targetId = parseInt(targetCard.getAttribute('data-id'));
+            if (targetId && targetId !== id) {
+              reorderWidgets(id, targetId);
+            }
+          }
+
+          clone.remove();
+          clone = null;
+          cardElement.classList.remove('dragging-touch');
+          document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
         }
       });
+
+      function moveClone(x, y) {
+        if (clone) {
+          clone.style.left = (x - clone.offsetWidth / 2) + 'px';
+          clone.style.top = (y - 40) + 'px';
+        }
+      }
     }
 
     function reorderWidgets(fromId, toId) {
@@ -2136,84 +1958,51 @@
       linksPageGrid.innerHTML = '';
 
       quickLinks.forEach((link, idx) => {
-        let domain = '';
-        try { domain = new URL(link.url).hostname; } catch(e) { domain = 'google.com'; }
-        const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-
+        let domain = 'google.com';
+        try { domain = new URL(link.url).hostname; } catch(e) {}
         const tile = document.createElement('div');
         tile.className = 'link-page-tile';
-        tile.setAttribute('draggable', 'true');
-        tile.setAttribute('data-index', idx);
-
         tile.innerHTML = `
-          <img src="${faviconUrl}" alt="" onerror="this.src='icon.png'">
+          <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=64" alt="" onerror="this.src='icon.png'">
           <span>${link.name}</span>
           <button class="link-page-delete-btn" onclick="removePageLinkItem(${idx})">&times;</button>
         `;
-
-        tile.onclick = (e) => {
-          if (e.target.closest('button')) return;
-          window.open(link.url, '_blank');
-        };
-
-        setupDragAndDropForLink(tile, idx);
+        tile.onclick = (e) => { if (!e.target.closest('button')) window.open(link.url, '_blank'); };
         linksPageGrid.appendChild(tile);
       });
 
       const diaryWidgets = widgets.filter(w => w.type === 'diary');
       const otherWidgets = widgets.filter(w => w.type !== 'diary');
 
-      if (diaryWidgets.length > 0) {
-        tweetsDivider.style.display = 'block';
-      } else {
-        tweetsDivider.style.display = 'none';
-        paginationContainer.style.display = 'none';
-      }
+      tweetsDivider.style.display = diaryWidgets.length > 0 ? 'block' : 'none';
 
       const totalPages = Math.ceil(diaryWidgets.length / tweetsPerPage);
-      if (currentTweetPage > totalPages && totalPages > 0) {
-        currentTweetPage = totalPages;
-      }
+      if (currentTweetPage > totalPages && totalPages > 0) currentTweetPage = totalPages;
 
-      const startIndex = (currentTweetPage - 1) * tweetsPerPage;
-      const currentDiaryPageItems = diaryWidgets.slice(startIndex, startIndex + tweetsPerPage);
-
-      currentDiaryPageItems.forEach(w => {
+      diaryWidgets.slice((currentTweetPage - 1) * tweetsPerPage, currentTweetPage * tweetsPerPage).forEach(w => {
         const text = w.data.text || '';
         const isLong = text.length > charLimit;
         const isExpanded = expandedTweets[w.id];
 
-        let displayHtmlText = text;
-        let readMoreBtnHtml = '';
+        let displayText = isLong && !isExpanded ? text.substring(0, charLimit) + '...' : text;
+        let readMoreBtn = isLong ? `<button class="read-more-btn" onclick="toggleReadMore(${w.id})">${isExpanded ? 'скрыть' : 'читать дальше...'}</button>` : '';
 
-        if (isLong && !isExpanded) {
-          displayHtmlText = text.substring(0, charLimit) + '...';
-          readMoreBtnHtml = `<button class="read-more-btn" onclick="toggleReadMore(${w.id})">читать дальше...</button>`;
-        } else if (isLong && isExpanded) {
-          readMoreBtnHtml = `<button class="read-more-btn" onclick="toggleReadMore(${w.id})">скрыть</button>`;
-        }
-
-        const editedLabelHtml = w.isEdited ? `<span class="tweet-edited-label">(изменено)</span>` : '';
         const tweetItem = document.createElement('div');
         tweetItem.className = 'tweet-item';
         tweetItem.id = 'tweet-item-' + w.id;
-
         tweetItem.innerHTML = `
           <div class="tweet-top-row">
-            <div>
-              <span>${w.createdAt || 'Только что'}</span>
-              ${editedLabelHtml}
-            </div>
+            <div><span>${w.createdAt || ''}</span>${w.isEdited ? '<span class="tweet-edited-label">(изменено)</span>' : ''}</div>
             <div style="position: relative;">
-              <button class="tweet-menu-btn" onclick="toggleTweetMenu(event, ${w.id})" title="Опции">•••</button>
+              <button class="tweet-menu-btn" onclick="toggleTweetMenu(event, ${w.id})">•••</button>
               <div id="menu-${w.id}" class="tweet-dropdown-menu">
                 <button class="menu-item-edit" onclick="startEditTweet(${w.id})">Изменить</button>
                 <button class="menu-item-delete" onclick="promptDelete(${w.id})">Удалить</button>
               </div>
             </div>
           </div>
-          <div class="tweet-text-content">${displayHtmlText}</div>
-          ${readMoreBtnHtml}
+          <div class="tweet-text-content">${displayText}</div>
+          ${readMoreBtn}
         `;
         twitterTweetsList.appendChild(tweetItem);
       });
@@ -2224,14 +2013,9 @@
           const pageBtn = document.createElement('button');
           pageBtn.className = `page-btn ${i === currentTweetPage ? 'active' : ''}`;
           pageBtn.innerText = i;
-          pageBtn.onclick = () => {
-            currentTweetPage = i;
-            render();
-          };
+          pageBtn.onclick = () => { currentTweetPage = i; render(); };
           paginationContainer.appendChild(pageBtn);
         }
-      } else {
-        paginationContainer.style.display = 'none';
       }
 
       otherWidgets.forEach(w => {
@@ -2240,104 +2024,60 @@
         card.setAttribute('data-id', w.id);
 
         let bodyHTML = '';
-
         if (w.type === 'counter') {
           if (!w.data || !w.data.configured) {
-            const defaultDateTime = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            const defTime = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
             bodyHTML = `
               <div style="display: flex; flex-direction: column; gap: 8px; margin: 6px 0 10px 0;">
-                <label style="font-size: 0.75rem; color: var(--text-muted);">Название счетчика:</label>
+                <label style="font-size: 0.75rem; color: var(--text-muted);">Название:</label>
                 <input type="text" id="counter-name-${w.id}" class="widget-input" value="${w.title}">
-                
-                <label style="font-size: 0.75rem; color: var(--text-muted);">Дата и время начала:</label>
-                <input type="datetime-local" id="counter-date-${w.id}" class="widget-input" value="${defaultDateTime}">
-                
-                <button class="primary" style="margin-top: 4px;" onclick="saveCounterConfig(${w.id})">Начать</button>
-              </div>
-            `;
+                <label style="font-size: 0.75rem; color: var(--text-muted);">Дата и время:</label>
+                <input type="datetime-local" id="counter-date-${w.id}" class="widget-input" value="${defTime}">
+                <button class="primary" onclick="saveCounterConfig(${w.id})">Начать</button>
+              </div>`;
           } else {
-            const startDateObj = new Date(w.data.startTime);
-            const formattedStartDate = startDateObj.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' в ' + startDateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-
+            const startStr = new Date(w.data.startTime).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             bodyHTML = `
               <div>
                 <div class="counter-timer-grid" id="timer-grid-${w.id}">
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-days-${w.id}">0</div>
-                    <div class="timer-label">дней</div>
-                  </div>
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-hours-${w.id}">00</div>
-                    <div class="timer-label">часов</div>
-                  </div>
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-mins-${w.id}">00</div>
-                    <div class="timer-label">минут</div>
-                  </div>
-                  <div class="timer-box">
-                    <div class="timer-num" id="t-secs-${w.id}">00</div>
-                    <div class="timer-label">секунд</div>
-                  </div>
+                  <div class="timer-box"><div class="timer-num" id="t-days-${w.id}">0</div><div class="timer-label">дней</div></div>
+                  <div class="timer-box"><div class="timer-num" id="t-hours-${w.id}">00</div><div class="timer-label">часов</div></div>
+                  <div class="timer-box"><div class="timer-num" id="t-mins-${w.id}">00</div><div class="timer-label">минут</div></div>
+                  <div class="timer-box"><div class="timer-num" id="t-secs-${w.id}">00</div><div class="timer-label">секунд</div></div>
                 </div>
-                <div class="counter-start-info">Начало: ${formattedStartDate}</div>
-              </div>
-            `;
+                <div class="counter-start-info">Начало: ${startStr}</div>
+              </div>`;
           }
-        } 
-        else if (w.type === 'savings') {
-          const current = w.data.current || 0;
-          const target = w.data.target || 1;
-          const percent = Math.min(100, Math.round((current / target) * 100));
-          
+        } else if (w.type === 'savings') {
+          const cur = w.data.current || 0;
+          const tgt = w.data.target || 1;
+          const pct = Math.min(100, Math.round((cur / tgt) * 100));
           bodyHTML = `
             <div>
-              <div class="savings-row">
-                <span>Накоплено:</span>
-                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${current}" onchange="updateSavingsCurrent(${w.id}, this.value)">
-              </div>
-              <div class="savings-row">
-                <span>Цель:</span>
-                <input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${target}" onchange="updateSavingsTarget(${w.id}, this.value)">
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: ${percent}%;"></div>
-              </div>
+              <div class="savings-row"><span>Накоплено:</span><input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${cur}" onchange="updateSavingsCurrent(${w.id}, this.value)"></div>
+              <div class="savings-row"><span>Цель:</span><input type="number" class="widget-input" style="width: 130px; padding: 6px;" value="${tgt}" onchange="updateSavingsTarget(${w.id}, this.value)"></div>
+              <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%;"></div></div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Прогресс: ${percent}%</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Прогресс: ${pct}%</span>
                 <button class="primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openSavingsModal(${w.id})">+ Пополнить</button>
               </div>
-            </div>
-          `;
-        } 
-        else if (w.type === 'tasks') {
-          const itemsHTML = w.data.map((task, idx) => `
-            <div class="task-item ${task.done ? 'done' : ''}">
-              <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${w.id}, ${idx})">
-              <input type="text" class="widget-input" value="${task.text}" onchange="updateTaskText(${w.id}, ${idx}, this.value)">
+            </div>`;
+        } else if (w.type === 'tasks') {
+          const itemsHTML = w.data.map((t, idx) => `
+            <div class="task-item ${t.done ? 'done' : ''}">
+              <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${w.id}, ${idx})">
+              <input type="text" class="widget-input" value="${t.text}" onchange="updateTaskText(${w.id}, ${idx}, this.value)">
               <button class="btn-delete" onclick="removeTask(${w.id}, ${idx})">&times;</button>
-            </div>
-          `).join('');
-
-          bodyHTML = `
-            <div class="task-list">${itemsHTML}</div>
-            <button onclick="addTask(${w.id})" style="width: 100%;">+ Добавить задачу</button>
-          `;
+            </div>`).join('');
+          bodyHTML = `<div class="task-list">${itemsHTML}</div><button onclick="addTask(${w.id})" style="width: 100%;">+ Добавить задачу</button>`;
         }
 
         const showTitleHeader = (w.type !== 'counter' || (w.data && w.data.configured));
-
         card.innerHTML = `
-          ${showTitleHeader ? `
-            <div class="card-header">
-              <span class="card-title" contenteditable="true" onblur="updateTitle(${w.id}, this.innerText)">${w.title}</span>
-              <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
-            </div>
-          ` : `
-            <div class="card-header">
-              <span class="card-title">Настройка счетчика</span>
-              <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
-            </div>
-          `}
+          <div class="card-header">
+            <span class="card-title" ${showTitleHeader ? 'contenteditable="true" onblur="updateTitle(' + w.id + ', this.innerText)"' : ''}>${showTitleHeader ? w.title : 'Настройка счетчика'}</span>
+            <button class="btn-delete" onclick="promptDelete(${w.id})">&times;</button>
+          </div>
           ${bodyHTML}
         `;
 
@@ -2346,53 +2086,35 @@
       });
     }
 
-    function updateTitle(id, newTitle) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.title = newTitle;
-        saveAndRender();
-      }
+    function updateTitle(id, val) {
+      const w = widgets.find(item => item.id === id);
+      if (w) { w.title = val; saveAndRender(); }
     }
 
     function updateSavingsTarget(id, val) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data.target = parseFloat(val) || 1;
-        saveAndRender();
-      }
+      const w = widgets.find(item => item.id === id);
+      if (w) { w.data.target = parseFloat(val) || 1; saveAndRender(); }
     }
 
     function addTask(id) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data.push({ text: 'Новая задача', done: false });
-        saveAndRender();
-      }
+      const w = widgets.item ? widgets.find(item => item.id === id) : widgets.find(item => item.id === id);
+      if (w) { w.data.push({ text: 'Новая задача', done: false }); saveAndRender(); }
     }
 
     function toggleTask(id, idx) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data[idx].done = !widget.data[idx].done;
-        saveAndRender();
-      }
+      const w = widgets.find(item => item.id === id);
+      if (w) { w.data[idx].done = !w.data[idx].done; saveAndRender(); }
     }
 
     function updateTaskText(id, idx, val) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data[idx].text = val;
-        saveAndRender();
-      }
+      const w = widgets.find(item => item.id === id);
+      if (w) { w.data[idx].text = val; saveAndRender(); }
     }
 
     function removeTask(id, idx) {
-      const widget = widgets.find(w => w.id === id);
-      if (widget) {
-        widget.data.splice(idx, 1);
-        saveAndRender();
-      }
+      const w = widgets.find(item => item.id === id);
+      if (w) { w.data.splice(idx, 1); saveAndRender(); }
     }
   </script>
 </body>
-  </html>
+</html>
