@@ -1068,7 +1068,7 @@
       padding: 12px;
     }
 
-    /* Стили для селектора смен в модалке календаря */
+    /* Стили для селектора смен в модалке календаря (Яркий желтый и насыщенный фиолетовый) */
     .shift-select-row {
       display: flex;
       gap: 8px;
@@ -1083,21 +1083,22 @@
       font-weight: 600;
       color: #ffffff;
       cursor: pointer;
-      opacity: 0.5;
+      opacity: 0.4;
       transition: all 0.2s;
     }
 
     .shift-btn.selected {
       opacity: 1;
       border-color: #ffffff;
+      box-shadow: 0 0 8px rgba(255,255,255,0.2);
     }
 
     .shift-btn-day {
-      background-color: #d4ac0d;
+      background-color: #e3af34; 
     }
 
     .shift-btn-night {
-      background-color: #2980b9;
+      background-color: #8c52ff; 
     }
 
     .shift-btn-none {
@@ -1142,14 +1143,14 @@
         <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">График смен:</div>
         <div class="shift-select-row">
           <button type="button" class="shift-btn shift-btn-none selected" id="shiftBtnNone" onclick="selectShiftType('none')">Нет</button>
-          <button type="button" class="shift-btn shift-btn-day" id="shiftBtnDay" onclick="selectShiftType('day')">В день</button>
-          <button type="button" class="shift-btn shift-btn-night" id="shiftBtnNight" onclick="selectShiftType('night')">В ночь</button>
+          <button type="button" class="shift-btn shift-btn-day" id="shiftBtnDay" onclick="selectShiftType('day')">День</button>
+          <button type="button" class="shift-btn shift-btn-night" id="shiftBtnNight" onclick="selectShiftType('night')">Ночь</button>
         </div>
       </div>
 
       <div>
         <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">Заметка на этот день:</div>
-        <textarea id="calDayNoteInput" class="widget-input" placeholder="Например: поход к врачу..." rows="3" style="resize: vertical;"></textarea>
+        <textarea id="calDayNoteInput" class="widget-input" placeholder="Заметка..." rows="3" style="resize: vertical;"></textarea>
       </div>
 
       <div class="modal-buttons" style="margin-top: 4px;">
@@ -1764,9 +1765,9 @@
 
         if (dayData) {
           if (dayData.shift === 'day') {
-            badgeHtml = `<div class="cal-day-badge" style="background-color: #d4ac0d;">В день</div>`;
+            badgeHtml = `<div class="cal-day-badge" style="background-color: #e3af34;">день</div>`;
           } else if (dayData.shift === 'night') {
-            badgeHtml = `<div class="cal-day-badge" style="background-color: #2980b9;">В ночь</div>`;
+            badgeHtml = `<div class="cal-day-badge" style="background-color: #8c52ff;">ночь</div>`;
           }
 
           if (dayData.note && dayData.note.trim() !== '') {
