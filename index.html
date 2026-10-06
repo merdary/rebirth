@@ -266,7 +266,7 @@
       background-color: rgba(242, 63, 67, 0.1);
     }
 
-    /* Навигация по вкладкам (с поддержкой Drag & Drop) */
+    /* Навигация по вкладкам */
     .tabs-nav-container {
       display: flex;
       gap: 8px;
@@ -606,7 +606,7 @@
       color: var(--danger-color) !important;
     }
 
-    /* Карточки виджетов (Drag and Drop) */
+    /* Карточки виджетов */
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -821,7 +821,7 @@
       color: var(--text-muted);
     }
 
-    /* Стили вкладки «Быстрые ссылки» (полноразмерная) */
+    /* Стили вкладки «Быстрые ссылки» */
     .links-page-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -917,7 +917,7 @@
       color: var(--danger-color);
     }
 
-    /* Стили вкладки «Календарь» (График смен) */
+    /* Стили вкладки «Календарь» */
     .calendar-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -998,13 +998,26 @@
 
     .cal-day-badge {
       font-size: 0.65rem;
-      padding: 2px 4px;
-      border-radius: 4px;
+      padding: 3px 4px;
+      border-radius: 6px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       text-align: center;
-      font-weight: 500;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    /* Индикатор наличия заметки (белая точка справа вверху) */
+    .cal-day-note-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 7px;
+      height: 7px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
     }
 
     /* Модальные окна */
@@ -1032,7 +1045,7 @@
       border-radius: 14px;
       padding: 20px;
       width: 100%;
-      max-width: 320px;
+      max-width: 340px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
@@ -1055,27 +1068,42 @@
       padding: 12px;
     }
 
-    .color-picker-row {
+    /* Стили для селектора смен в модалке календаря */
+    .shift-select-row {
       display: flex;
-      justify-content: space-between;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .color-dot {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
+    .shift-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
       border: 2px solid transparent;
-      transition: transform 0.2s;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: all 0.2s;
     }
 
-    .color-dot:hover {
-      transform: scale(1.1);
-    }
-
-    .color-dot.selected {
+    .shift-btn.selected {
+      opacity: 1;
       border-color: #ffffff;
+    }
+
+    .shift-btn-day {
+      background-color: #d4ac0d;
+    }
+
+    .shift-btn-night {
+      background-color: #2980b9;
+    }
+
+    .shift-btn-none {
+      background-color: var(--bg-color);
+      border-color: var(--border-color);
+      color: var(--text-muted);
     }
   </style>
 </head>
@@ -1105,21 +1133,27 @@
     </div>
   </div>
 
-  <!-- Модальное окно настройки дня в календаре -->
+  <!-- Модальное окно настройки дня в календаре (График смен и заметки) -->
   <div id="calendarDayModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-text" id="calModalDateTitle" style="font-weight: 600; color: #fff;">Настройка дня</div>
-      <input type="text" id="calDayNoteInput" class="widget-input" placeholder="Название">
-      <div style="font-size: 0.75rem; color: var(--text-muted); text-align: left;">Выберите цвет метки:</div>
-      <div class="color-picker-row">
-        <div class="color-dot selected" style="background-color: #5865f2;" onclick="selectCalColor('#5865f2', this)"></div>
-        <div class="color-dot" style="background-color: #23a55a;" onclick="selectCalColor('#23a55a', this)"></div>
-        <div class="color-dot" style="background-color: #f0b232;" onclick="selectCalColor('#f0b232', this)"></div>
-        <div class="color-dot" style="background-color: #f23f43;" onclick="selectCalColor('#f23f43', this)"></div>
-        <div class="color-dot" style="background-color: #9b59b6;" onclick="selectCalColor('#9b59b6', this)"></div>
+    <div class="modal-card" style="text-align: left;">
+      <div class="modal-text" id="calModalDateTitle" style="font-weight: 600; color: #fff; text-align: center;">Настройка дня</div>
+      
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">График смен:</div>
+        <div class="shift-select-row">
+          <button type="button" class="shift-btn shift-btn-none selected" id="shiftBtnNone" onclick="selectShiftType('none')">Нет</button>
+          <button type="button" class="shift-btn shift-btn-day" id="shiftBtnDay" onclick="selectShiftType('day')">В день</button>
+          <button type="button" class="shift-btn shift-btn-night" id="shiftBtnNight" onclick="selectShiftType('night')">В ночь</button>
+        </div>
       </div>
-      <div class="modal-buttons">
-        <button class="danger" onclick="clearCalendarDay()">Очистить</button>
+
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">Заметка на этот день:</div>
+        <textarea id="calDayNoteInput" class="widget-input" placeholder="Например: поход к врачу..." rows="3" style="resize: vertical;"></textarea>
+      </div>
+
+      <div class="modal-buttons" style="margin-top: 4px;">
+        <button class="danger" onclick="clearCalendarDay()">Очистить день</button>
         <button class="primary" onclick="saveCalendarDayData()">Сохранить</button>
       </div>
     </div>
@@ -1197,7 +1231,7 @@
       </div>
     </header>
 
-    <!-- Навигация по вкладкам (можно менять местами Drag & Drop) -->
+    <!-- Навигация по вкладкам -->
     <div class="tabs-nav-container" id="tabsNavContainer">
       <button class="tab-nav-btn active" data-tab="widgets" draggable="true" onclick="switchTab('widgets')">📊 Виджеты</button>
       <button class="tab-nav-btn" data-tab="links" draggable="true" onclick="switchTab('links')">🔗 Быстрые ссылки</button>
@@ -1303,7 +1337,7 @@
 
     let calDate = new Date();
     let selectedCalDateStr = null;
-    let selectedCalColorHex = '#5865f2';
+    let selectedShiftType = 'none'; // 'none', 'day', 'night'
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -1355,7 +1389,6 @@
       try {
         await auth.signInWithEmailAndPassword(email, password);
       } catch (error) {
-        console.error("Login Error:", error.code);
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
           loginError.innerText = 'неверный логин или пароль';
         } else {
@@ -1391,7 +1424,6 @@
         });
 
       } catch (error) {
-        console.error("Register Error:", error.code);
         if (error.code === 'auth/email-already-in-use') {
           regError.innerText = 'пользователь уже зарегистрирован';
         } else if (error.code === 'auth/weak-password') {
@@ -1427,7 +1459,6 @@
         alert('Инструкции по восстановлению пароля отправлены на почту: ' + email);
         closeForgotModal();
       } catch (error) {
-        console.error("Reset Password Error:", error.code);
         if (error.code === 'auth/user-not-found') {
           forgotError.innerText = 'пользователь с такой почтой не найден';
         } else if (error.code === 'auth/invalid-email') {
@@ -1460,7 +1491,6 @@
           calendarShifts = d.shifts || {};
           
           if (d.tabOrder && Array.isArray(d.tabOrder)) {
-            // Убираем из сохраненного порядка 'gallery', если она там осталась
             tabOrder = d.tabOrder.filter(t => t !== 'gallery');
             if (!tabOrder.includes('widgets')) tabOrder.push('widgets');
             if (!tabOrder.includes('links')) tabOrder.push('links');
@@ -1648,70 +1678,6 @@
           reorderLinks(draggedLinkIndex, index);
         }
       });
-
-      let touchTimeout = null;
-      let startX = 0, startY = 0;
-      let isTouchActive = false;
-
-      tile.addEventListener('touchstart', (e) => {
-        if (e.target.closest('button')) return;
-        const touch = e.touches[0];
-        startX = touch.clientX;
-        startY = touch.clientY;
-        isTouchActive = false;
-
-        touchTimeout = setTimeout(() => {
-          isTouchActive = true;
-          draggedLinkIndex = index;
-          tile.classList.add('dragging');
-        }, 80);
-      }, { passive: true });
-
-      tile.addEventListener('touchmove', (e) => {
-        if (!touchTimeout) return;
-        const touch = e.touches[0];
-        const moveX = Math.abs(touch.clientX - startX);
-        const moveY = Math.abs(touch.clientY - startY);
-
-        if (moveY > 15 && moveY > moveX && !isTouchActive) {
-          clearTimeout(touchTimeout);
-          touchTimeout = null;
-          return;
-        }
-
-        if (isTouchActive) {
-          e.preventDefault();
-          const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
-          const targetTile = elementUnder ? elementUnder.closest('.link-page-tile') : null;
-          document.querySelectorAll('.link-page-tile').forEach(t => t.classList.remove('drag-over'));
-          if (targetTile && targetTile !== tile) {
-            targetTile.classList.add('drag-over');
-          }
-        }
-      }, { passive: false });
-
-      tile.addEventListener('touchend', (e) => {
-        if (touchTimeout) {
-          clearTimeout(touchTimeout);
-          touchTimeout = null;
-        }
-        if (!isTouchActive) return;
-        isTouchActive = false;
-        tile.classList.remove('dragging');
-
-        const touch = e.changedTouches[0];
-        const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
-        const targetTile = elementUnder ? elementUnder.closest('.link-page-tile') : null;
-        document.querySelectorAll('.link-page-tile').forEach(t => t.classList.remove('drag-over'));
-
-        if (targetTile) {
-          const targetIndex = parseInt(targetTile.getAttribute('data-index'));
-          if (!isNaN(targetIndex) && targetIndex !== draggedLinkIndex) {
-            reorderLinks(draggedLinkIndex, targetIndex);
-          }
-        }
-        draggedLinkIndex = null;
-      });
     }
 
     function reorderLinks(fromIdx, toIdx) {
@@ -1792,14 +1758,25 @@
         const isToday = (item.dateStr === todayStr);
         cell.className = `cal-day-cell ${!item.isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`;
         
-        const shiftData = calendarShifts[item.dateStr];
+        const dayData = calendarShifts[item.dateStr];
         let badgeHtml = '';
-        if (shiftData && shiftData.text) {
-          badgeHtml = `<div class="cal-day-badge" style="background-color: ${shiftData.color || '#5865f2'}; color: #fff;">${shiftData.text}</div>`;
+        let noteDotHtml = '';
+
+        if (dayData) {
+          if (dayData.shift === 'day') {
+            badgeHtml = `<div class="cal-day-badge" style="background-color: #d4ac0d;">В день</div>`;
+          } else if (dayData.shift === 'night') {
+            badgeHtml = `<div class="cal-day-badge" style="background-color: #2980b9;">В ночь</div>`;
+          }
+
+          if (dayData.note && dayData.note.trim() !== '') {
+            noteDotHtml = `<div class="cal-day-note-dot" title="Есть заметка"></div>`;
+          }
         }
 
         cell.innerHTML = `
           <div class="cal-day-num">${item.day}</div>
+          ${noteDotHtml}
           ${badgeHtml}
         `;
 
@@ -1812,17 +1789,11 @@
       selectedCalDateStr = dateStr;
       document.getElementById('calModalDateTitle').innerText = `${dayNum} ${monthName} ${year}`;
       
-      const existing = calendarShifts[dateStr] || { text: '', color: '#5865f2' };
-      document.getElementById('calDayNoteInput').value = existing.text || '';
-      selectedCalColorHex = existing.color || '#5865f2';
+      const existing = calendarShifts[dateStr] || { shift: 'none', note: '' };
+      selectedShiftType = existing.shift || 'none';
+      document.getElementById('calDayNoteInput').value = existing.note || '';
 
-      document.querySelectorAll('.color-dot').forEach(dot => {
-        if (dot.style.backgroundColor === hexToRgb(selectedCalColorHex) || dot.style.backgroundColor === selectedCalColorHex) {
-          dot.classList.add('selected');
-        } else {
-          dot.classList.remove('selected');
-        }
-      });
+      updateShiftButtonsUI();
 
       document.getElementById('calendarDayModal').classList.add('show');
       setTimeout(() => document.getElementById('calDayNoteInput').focus(), 50);
@@ -1833,17 +1804,33 @@
       document.getElementById('calendarDayModal').classList.remove('show');
     }
 
-    function selectCalColor(hex, el) {
-      selectedCalColorHex = hex;
-      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
-      el.classList.add('selected');
+    function selectShiftType(type) {
+      selectedShiftType = type;
+      updateShiftButtonsUI();
+    }
+
+    function updateShiftButtonsUI() {
+      document.getElementById('shiftBtnNone').classList.remove('selected');
+      document.getElementById('shiftBtnDay').classList.remove('selected');
+      document.getElementById('shiftBtnNight').classList.remove('selected');
+
+      if (selectedShiftType === 'day') {
+        document.getElementById('shiftBtnDay').classList.add('selected');
+      } else if (selectedShiftType === 'night') {
+        document.getElementById('shiftBtnNight').classList.add('selected');
+      } else {
+        document.getElementById('shiftBtnNone').classList.add('selected');
+      }
     }
 
     function saveCalendarDayData() {
-      const text = document.getElementById('calDayNoteInput').value.trim();
+      const noteText = document.getElementById('calDayNoteInput').value.trim();
       if (selectedCalDateStr) {
-        if (text) {
-          calendarShifts[selectedCalDateStr] = { text: text, color: selectedCalColorHex };
+        if (selectedShiftType !== 'none' || noteText !== '') {
+          calendarShifts[selectedCalDateStr] = {
+            shift: selectedShiftType,
+            note: noteText
+          };
         } else {
           delete calendarShifts[selectedCalDateStr];
         }
@@ -1860,10 +1847,6 @@
         renderCalendar();
       }
       closeCalendarDayModal();
-    }
-
-    function hexToRgb(hex) {
-      return hex;
     }
 
     function addWidget(type) {
@@ -2126,70 +2109,6 @@
         if (draggedId !== null && draggedId !== id) {
           reorderWidgets(draggedId, id);
         }
-      });
-
-      let touchTimeout = null;
-      let startX = 0, startY = 0;
-      let isTouchActive = false;
-
-      cardElement.addEventListener('touchstart', (e) => {
-        if (e.target.closest('input, textarea, button, [contenteditable="true"], a')) return;
-        const touch = e.touches[0];
-        startX = touch.clientX;
-        startY = touch.clientY;
-        isTouchActive = false;
-
-        touchTimeout = setTimeout(() => {
-          isTouchActive = true;
-          draggedId = id;
-          cardElement.classList.add('dragging');
-        }, 80);
-      }, { passive: true });
-
-      cardElement.addEventListener('touchmove', (e) => {
-        if (!touchTimeout) return;
-        const touch = e.touches[0];
-        const moveX = Math.abs(touch.clientX - startX);
-        const moveY = Math.abs(touch.clientY - startY);
-
-        if (moveY > 15 && moveY > moveX && !isTouchActive) {
-          clearTimeout(touchTimeout);
-          touchTimeout = null;
-          return;
-        }
-
-        if (isTouchActive) {
-          e.preventDefault();
-          const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
-          const targetCard = elementUnder ? elementUnder.closest('.card') : null;
-          document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
-          if (targetCard && targetCard !== cardElement) {
-            targetCard.classList.add('drag-over');
-          }
-        }
-      }, { passive: false });
-
-      cardElement.addEventListener('touchend', (e) => {
-        if (touchTimeout) {
-          clearTimeout(touchTimeout);
-          touchTimeout = null;
-        }
-        if (!isTouchActive) return;
-        isTouchActive = false;
-        cardElement.classList.remove('dragging');
-
-        const touch = e.changedTouches[0];
-        const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
-        const targetCard = elementUnder ? elementUnder.closest('.card') : null;
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
-
-        if (targetCard) {
-          const targetId = parseInt(targetCard.getAttribute('data-id'));
-          if (targetId && targetId !== draggedId) {
-            reorderWidgets(draggedId, targetId);
-          }
-        }
-        draggedId = null;
       });
     }
 
@@ -2475,4 +2394,4 @@
     }
   </script>
 </body>
-          </html>
+</html>
