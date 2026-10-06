@@ -1458,8 +1458,13 @@
           widgets = d.list || [];
           quickLinks = d.links || [];
           calendarShifts = d.shifts || {};
+          
           if (d.tabOrder && Array.isArray(d.tabOrder)) {
-            tabOrder = d.tabOrder;
+            // Убираем из сохраненного порядка 'gallery', если она там осталась
+            tabOrder = d.tabOrder.filter(t => t !== 'gallery');
+            if (!tabOrder.includes('widgets')) tabOrder.push('widgets');
+            if (!tabOrder.includes('links')) tabOrder.push('links');
+            if (!tabOrder.includes('calendar')) tabOrder.push('calendar');
           }
         } else {
           widgets = [];
@@ -1644,7 +1649,6 @@
         }
       });
 
-      // Поддержка сенсорных экранов (смартфонов)
       let touchTimeout = null;
       let startX = 0, startY = 0;
       let isTouchActive = false;
@@ -2471,4 +2475,4 @@
     }
   </script>
 </body>
-</html>
+          </html>
