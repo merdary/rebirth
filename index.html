@@ -603,25 +603,20 @@
       flex-direction: column;
       justify-content: space-between;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      cursor: grab;
       user-select: none;
       -webkit-user-select: none;
       transition: border-color 0.2s;
-      touch-action: pan-y;
       position: relative;
-    }
-
-    .card:active {
-      cursor: grabbing;
     }
 
     .card.dragging-touch {
       opacity: 0.85;
-      transform: scale(1.03);
+      transform: scale(1.02);
       border-color: var(--accent-color);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
-      z-index: 1000;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.7);
+      z-index: 9999;
       pointer-events: none;
+      will-change: transform, left, top;
     }
 
     .card.drag-over {
@@ -635,6 +630,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
+      cursor: default;
     }
 
     .card-title {
@@ -644,6 +640,7 @@
       outline: none;
       padding: 2px 4px;
       border-radius: 4px;
+      cursor: text;
     }
 
     .card-title:focus {
@@ -1851,12 +1848,17 @@
       }
     }
 
-    // --- УНИВЕРСАЛЬНЫЙ DRAG-AND-DROP (ПК + СЕНСОРНЫЕ ТЕЛЕФОНЫ) ---
+    // --- ПЛАВНЫЙ DRAG-AND-DROP (ПК + СЕНСОРНЫЕ ТЕЛЕФОНЫ ТОЛЬКО ЗА РАМКУ) ---
     function setupDragAndDropForCard(cardElement, id) {
       cardElement.setAttribute('draggable', 'true');
 
       // ПК (HTML5 Drag & Drop)
       cardElement.addEventListener('dragstart', (e) => {
+        // Запрещаем перетаскивание с ПК, если кликнули на заголовок, инпут, кнопки
+        if (e.target.closest('.card-title') || e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('[contenteditable]')) {
+          e.preventDefault();
+          return;
+        }
         e.dataTransfer.setData('text/plain', id);
         setTimeout(() => cardElement.classList.add('dragging-touch'), 0);
       });
@@ -1868,49 +1870,78 @@
         if (fromId && fromId !== id) reorderWidgets(fromId, id);
       });
 
-      // Телефон (Touch Events)
+      // Телефон (Touch Events с плавной анимацией через requestAnimationFrame)
+      let touchStartX = 0;
       let touchStartY = 0;
       let clone = null;
+      let isDragging = false;
+      let currentX = 0;
+      let currentY = 0;
+      let rafId = null;
 
       cardElement.addEventListener('touchstart', (e) => {
-        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('[contenteditable]')) return;
+        // Разрешаем перетаскивание ТОЛЬКО если палец на рамке (не на заголовке, инпутах, кнопках)
+        if (e.target.closest('.card-title') || e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('[contenteditable]')) {
+          return;
+        }
+        touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
+        isDragging = false;
       }, { passive: true });
 
       cardElement.addEventListener('touchmove', (e) => {
-        const touchY = e.touches[0].clientY;
-        if (Math.abs(touchY - touchStartY) > 15 && !clone) {
+        if (e.target.closest('.card-title') || e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('[contenteditable]')) {
+          return;
+        }
+
+        currentX = e.touches[0].clientX;
+        currentY = e.touches[0].clientY;
+
+        // Если сдвинули палец больше чем на 8 пикселей — активируем перетаскивание
+        if (!isDragging && (Math.abs(currentX - touchStartX) > 8 || Math.abs(currentY - touchStartY) > 8)) {
+          isDragging = true;
           cardElement.classList.add('dragging-touch');
+          
           clone = cardElement.cloneNode(true);
           clone.style.position = 'fixed';
           clone.style.width = cardElement.offsetWidth + 'px';
+          clone.style.height = cardElement.offsetHeight + 'px';
           clone.style.zIndex = '9999';
-          clone.style.opacity = '0.8';
+          clone.style.opacity = '0.9';
+          clone.style.pointerEvents = 'none';
           document.body.appendChild(clone);
-          moveClone(e.touches[0].clientX, touchY);
         }
-        if (clone) {
-          e.preventDefault();
-          moveClone(e.touches[0].clientX, touchY);
-          
-          // Определяем над каким элементом палец
-          clone.style.display = 'none';
-          let elemBelow = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-          clone.style.display = 'block';
 
-          let targetCard = elemBelow ? elemBelow.closest('.card') : null;
-          document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
-          if (targetCard && targetCard !== cardElement) {
-            targetCard.classList.add('drag-over');
+        if (isDragging && clone) {
+          e.preventDefault(); // Предотвращаем скролл и баги обновления страницы
+
+          if (!rafId) {
+            rafId = requestAnimationFrame(() => {
+              clone.style.left = (currentX - clone.offsetWidth / 2) + 'px';
+              clone.style.top = (currentY - 40) + 'px';
+
+              clone.style.display = 'none';
+              let elemBelow = document.elementFromPoint(currentX, currentY);
+              clone.style.display = 'block';
+
+              let targetCard = elemBelow ? elemBelow.closest('.card') : null;
+              document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
+              if (targetCard && targetCard !== cardElement) {
+                targetCard.classList.add('drag-over');
+              }
+              rafId = null;
+            });
           }
         }
       }, { passive: false });
 
       cardElement.addEventListener('touchend', (e) => {
-        if (clone) {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+
+        if (isDragging && clone) {
           clone.style.display = 'none';
-          let touch = e.changedTouches[0];
-          let elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+          let elemBelow = document.elementFromPoint(currentX, currentY);
           let targetCard = elemBelow ? elemBelow.closest('.card') : null;
 
           if (targetCard) {
@@ -1922,17 +1953,11 @@
 
           clone.remove();
           clone = null;
+          isDragging = false;
           cardElement.classList.remove('dragging-touch');
           document.querySelectorAll('.card').forEach(c => c.classList.remove('drag-over'));
         }
       });
-
-      function moveClone(x, y) {
-        if (clone) {
-          clone.style.left = (x - clone.offsetWidth / 2) + 'px';
-          clone.style.top = (y - 40) + 'px';
-        }
-      }
     }
 
     function reorderWidgets(fromId, toId) {
@@ -2097,7 +2122,7 @@
     }
 
     function addTask(id) {
-      const w = widgets.item ? widgets.find(item => item.id === id) : widgets.find(item => item.id === id);
+      const w = widgets.find(item => item.id === id);
       if (w) { w.data.push({ text: 'Новая задача', done: false }); saveAndRender(); }
     }
 
